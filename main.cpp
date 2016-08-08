@@ -2,7 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
-#include "src/Application.h"
+#include "application/Application.h"
 
 
 int main(int argc, char **argv) {

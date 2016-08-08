@@ -22,7 +22,7 @@ include_directories("headers")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(SOURCE_FILES
-        src/UnitOfMeasure.cpp src/containers/Seq.h src/Application.cpp src/Application.h src/Combinators.h src/Event.cpp src/Event.h src/ArxEnum.cpp src/ArxEnum.h src/Optional.h src/core/Predef.h src/containers/ArxMap.h src/Noto.cpp src/Noto.h src/core/Predef.cpp src/GUIEvents.cpp src/GUIEvents.h src/engine/Engine.cpp src/engine/Engine.h src/core/Reflect.h src/core/AuxData.h src/engine/World.cpp src/engine/World.h)
+        src/UnitOfMeasure.cpp src/containers/Seq.h src/application/Application.cpp src/application/Application.h src/Combinators.h src/Event.cpp src/Event.h src/ArxEnum.cpp src/ArxEnum.h src/Optional.h src/core/Predef.h src/containers/ArxMap.h src/Noto.cpp src/Noto.h src/core/Predef.cpp src/GUIEvents.cpp src/GUIEvents.h src/engine/Engine.cpp src/engine/Engine.h src/core/Reflect.h src/core/AuxData.h src/engine/World.cpp src/engine/World.h src/application/GameApplication.cpp src/application/GameApplication.h)
 
 add_library(demo_lib STATIC ${SOURCE_FILES})
 add_executable(demo main.cpp ${GLAD})

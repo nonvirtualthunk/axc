@@ -8,9 +8,12 @@
 
 //#include <GLFW/glfw3.h>
 #include <glm/vec2.hpp>
+#include <memory>
+#include <functional>
+#include <UnitOfMeasure.h>
 
 class GLFWwindow;
-class EventBus;
+class Event;
 
 class Application {
 protected:
@@ -23,8 +26,6 @@ protected:
 
     bool fullPause = false;
 
-    EventBus* eventBus;
-
     void init();
     void loop();
 
@@ -32,6 +33,11 @@ protected:
 
 
     static void keyCallback(GLFWwindow* win,int key,int scancode,int action,int mods);
+
+
+    virtual void onEvent(std::shared_ptr<Event> e) {}
+    virtual void update(Time dt) {}
+    virtual void draw() {}
 public:
     Application();
 

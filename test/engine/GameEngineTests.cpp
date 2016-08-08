@@ -6,6 +6,14 @@
 
 #include <catch.hpp>
 #include <engine/Engine.h>
+#include <Noto.h>
+
+NEW_EVENT_TYPE(TestEvent) {
+public:
+    const int value;
+
+    TestEvent(int value) : Event(TestEventType), value(value) {}
+};
 
 class TestComponent : public GameComponent {
 public:
@@ -17,7 +25,9 @@ public:
     }
 
     virtual void init() override {
-
+        gameBus.onEvent<TestEvent>([&](TestEventPtr e) {
+           testValue = e->value;
+        });
     }
 
     virtual void update(Time dt) override {
@@ -48,3 +58,20 @@ TEST_CASE("Game engine threading","[engine][concurrency]") {
     REQUIRE(comp->updateCount > (int)((250/8) * 0.40));
     REQUIRE(comp->updateCount < (int)((250/8) * 1.00));
 }
+
+TEST_CASE("gameEngineEventBus","[engine][event]") {
+    GameEngine engine;
+
+    auto comp = engine.addComponent<TestComponent>();
+
+    REQUIRE(comp->testValue == 1);
+
+    engine.eventBus.addEvent(TestEvent(9));
+
+    REQUIRE(comp->testValue == 1);
+
+    comp->updateRaw(Seconds(1));
+
+    REQUIRE(comp->testValue == 9);
+}
+

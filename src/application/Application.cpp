@@ -22,7 +22,6 @@ Application* Application::inst = NULL;
 
 
 Application::Application() {
-    eventBus = new EventBus();
     Application::inst = this;
 }
 
@@ -50,6 +49,8 @@ void Application::loop() {
             fprintf(stderr, "update: %f\n", delta);
         }
         lastTime = curTime;
+
+        draw();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -122,8 +123,8 @@ void Application::keyCallback(GLFWwindow *win, int key, int scancode, int action
     }
     KeyboardMirror::setActiveModifiers(mods);
 
-    auto evt = KeyEvent(key,action == GLFW_PRESS,KeyModifiers(mods));
-    Application::inst->eventBus->addEvent(evt);
+    auto evt = std::make_shared<KeyEvent>(key,action == GLFW_PRESS,KeyModifiers(mods));
+    Application::inst->onEvent(evt);
 
     Noto::info("Key event called back: {}",key);
 }

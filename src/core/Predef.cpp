@@ -6,11 +6,11 @@
 #include <chrono>
 
 long long int epochMillisSteady() {
-    return chrono::steady_clock::now().time_since_epoch().count();
+    return chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now().time_since_epoch()).count();
 }
 
 long long int epochMillisSystem() {
-    return chrono::system_clock::now().time_since_epoch().count();
+    return chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
 }
 
 atomic_int &IdCounter::getIdCounter() {

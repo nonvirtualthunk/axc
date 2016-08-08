@@ -5,17 +5,18 @@
 #ifndef TEST2_EVENT_H
 #define TEST2_EVENT_H
 
-#include <set>
 #include <string>
 #include "ArxEnum.h"
 #include "UnitOfMeasure.h"
-#include "Optional.h"
 #include <vector>
 #include <mutex>
 #include <deque>
 #include <core/Predef.h>
 
 using namespace std;
+
+template<typename T>
+class Optional;
 
 class EventType : public ArxEnum {
 public:
@@ -63,21 +64,19 @@ public:
 public:
     EventBus();
 
-protected:
-    void addEventPtr(EventPtr event);
-
 public:
 
     template<typename E, typename std::enable_if<std::is_base_of<Event,E>::value>::type* = nullptr>
     void addEvent(const E& event) {
         auto newPtr = std::shared_ptr<E>(new E(event));
-        newPtr->entryTime = timeFunction();
         addEventPtr(newPtr);
     }
 
+    void addEventPtr(EventPtr event);
+
 
     class AsyncIterator {
-    protected:
+    public:
         EventBus& bus;
         int mostRecentId = 0;
         int mostRecentIndex = 0;
@@ -115,7 +114,8 @@ public:
                     auto event = ne.get();
 
                     auto endPoint = typedListeners.end();
-                    for (auto listenIter = typedListeners.find(event->eventType); listenIter != endPoint; ++listenIter) {
+                    auto listenIter = typedListeners.find(event->eventType);
+                    for (; listenIter != endPoint; ++listenIter) {
                         listenIter->second(event);
                     }
                 }

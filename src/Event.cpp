@@ -39,11 +39,14 @@ EventBus::EventBus() :
 
 void EventBus::addEventPtr(EventPtr event) {
     {
+
         std::lock_guard<std::mutex> guard(mutex);
 
-        events.push_back(event);
         auto curTime = timeFunction();
         auto cutoffTime = curTime - (long) keepEventsFor.in(Milliseconds);
+        event->entryTime = curTime;
+
+        events.push_back(event);
 
         while (!events.empty() && events.front()->entryTime < cutoffTime) {
             events.pop_front();

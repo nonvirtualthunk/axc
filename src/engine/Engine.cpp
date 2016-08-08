@@ -21,6 +21,12 @@ void GraphicsComponent::updateComp(Time dt) {
 
 GraphicsEngine::GraphicsEngine(GameEngine *gameEngine) : gameEngine(gameEngine) {}
 
+void GraphicsEngine::draw() {
+    for (GraphicsComponent* comp : components) {
+        comp->draw();
+    }
+}
+
 GameComponent::GameComponent(GameEngine *gameEngine) :
         gameEngine(gameEngine),
         world(gameEngine->world),
@@ -32,4 +38,30 @@ void GameComponent::updateComp(Time dt) {
     gameBus.update();
 
     update(dt);
+}
+
+ControlComponent::ControlComponent(ControlEngine *controlEngine) :
+        controlEngine(controlEngine),
+        world(controlEngine->graphicsEngine->gameEngine->world),
+        controlBus(controlEngine->eventBus.watcher()),
+        gameBus(controlEngine->gameEngine->eventBus.watcher()),
+        graphicsBus(controlEngine->graphicsEngine->eventBus.watcher()) {}
+
+{
+
+}
+
+void ControlComponent::updateComp(Time dt) {
+    gameBus.update();
+    graphicsBus.update();
+    controlBus.update();
+
+    update(dt);
+}
+
+ControlEngine::ControlEngine(GameEngine *gameEngine, GraphicsEngine *graphicsEngine) :
+        gameEngine(gameEngine),
+        graphicsEngine(graphicsEngine)
+{
+
 }

@@ -131,6 +131,8 @@ public:
     GameEngine* gameEngine;
 
     GraphicsEngine(GameEngine *gameEngine);
+
+    void draw();
 };
 
 class GraphicsComponent : public EngineComponent<GraphicsEngine> {
@@ -148,5 +150,29 @@ public:
     virtual void updateComp(Time dt) override;
 };
 
+
+class ControlComponent;
+
+class ControlEngine : public Engine<ControlComponent> {
+public:
+    GameEngine* gameEngine;
+    GraphicsEngine* graphicsEngine;
+
+    ControlEngine(GameEngine *gameEngine, GraphicsEngine *graphicsEngine);
+};
+
+class ControlComponent : public EngineComponent<ControlEngine> {
+protected:
+    ControlEngine* controlEngine;
+    World* world;
+    EventBus::Watcher gameBus;
+    EventBus::Watcher graphicsBus;
+    EventBus::Watcher controlBus;
+
+public:
+    ControlComponent(ControlEngine *controlEngien);
+
+    virtual void updateComp(Time dt) override;
+};
 
 #endif //TEST2_GAMEENGINE_H
