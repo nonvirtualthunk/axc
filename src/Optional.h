@@ -88,9 +88,10 @@ private:
     Optional(const bool isEmpty, const T value) : _isEmpty(isEmpty) {
         memcpy(intern,&value,sizeof(T));
     }
-    Optional() : _isEmpty(true) {}
 
 public:
+    Optional() : _isEmpty(true) {}
+
     bool operator==(const Optional &rhs) const {
         if (_isEmpty && rhs._isEmpty) {
             return true;

@@ -8,37 +8,20 @@
 #include <unordered_map>
 #include <Optional.h>
 #include <type_traits>
+#include "containers/DelegatingHasher.h"
 
 namespace Arx {
-
-
-    template<typename K>
-    class DelegatingHasher {
-    public:
-        template<typename U = K>
-        size_t operator()(const typename std::enable_if<!std::is_class<U>::value, U>::type& k) const {
-            return std::hash<K>()(k);
-        }
-
-        template<typename U = K>
-        auto operator()(const typename std::enable_if<std::is_class<U>::value, U>::type& k) const -> decltype(k.hash()){
-            return k.hash();
-        }
-
-
-        template<typename U = K>
-        auto operator()(const typename std::enable_if<std::is_class<U>::value, U>::type& k) const -> decltype(std::hash<U>()(k)) {
-            return std::hash<K>()(k);
-        }
-    };
 
 
     template<typename K, typename V>
     class Map {
     protected:
-        std::unordered_map<K, V, DelegatingHasher<K>> map;
+        typedef std::unordered_map<K, V, DelegatingHasher<K>> MapType;
+        MapType map;
 
     public:
+        typedef typename MapType::iterator IteratorType;
+        typedef typename MapType::const_iterator ConstIteratorType;
 
         const Optional<V> get(const K &k) const {
             const auto res = map.find(k);
@@ -50,7 +33,7 @@ namespace Arx {
         }
 
         V &getOrElseUpdate(const K &k, std::function<V()> vfunc) {
-            typename std::unordered_map<K, V>::iterator res = map.find(k);
+            typename MapType::iterator res = map.find(k);
             if (res == map.end()) {
                 put(k, vfunc());
                 return map[k];
@@ -59,11 +42,11 @@ namespace Arx {
             }
         }
 
-        V getOrElse(const K& k, std::function<V()> vfunc) {
+        V getOrElse(const K& k, std::function<V()> vfunc) const {
             return get(k).orElse(vfunc);
         }
 
-        V getOrElse(const K& k, const V& v) {
+        V getOrElse(const K& k, const V& v) const {
             return get(k).orElse(v);
         }
 
@@ -76,6 +59,26 @@ namespace Arx {
             if (!res.second) {
                 res.first->second = v;
             }
+        }
+
+        void foreach(std::function<void(K,V)> func) {
+            auto iter = map.begin();
+            auto end = map.end();
+            while (iter != end) {
+                func(iter->first, iter->second);
+                iter++;
+            }
+        }
+
+        size_t size() const {
+            return map.size();
+        }
+
+        ConstIteratorType begin() const {
+            return map.begin();
+        }
+        ConstIteratorType end() const {
+            return map.end();
         }
     };
 }

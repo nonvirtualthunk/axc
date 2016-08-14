@@ -16,18 +16,22 @@ class GLFWwindow;
 class Event;
 
 class Application {
-protected:
+public:
     const char* windowTitle = "Window";
     bool resizable = true;
     int swapInterval = 1;
     bool fullscreen = false;
     glm::ivec2 windowDimensions = glm::ivec2(800,600);
     glm::ivec2 frameDimensions = glm::ivec2(800,600);
+    Time lastSwap = Seconds(0);
 
     bool fullPause = false;
 
-    void init();
-    void loop();
+    virtual void init();
+
+    virtual void loop();
+
+    virtual void shutdown();
 
     void updateWindowDimensions();
 
@@ -38,10 +42,12 @@ protected:
     virtual void onEvent(std::shared_ptr<Event> e) {}
     virtual void update(Time dt) {}
     virtual void draw() {}
+
+    Time nextExpectedSwap() const;
 public:
     Application();
 
-    void run();
+    virtual void run();
 
     static Application* inst;
 };

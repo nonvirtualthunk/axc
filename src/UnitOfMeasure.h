@@ -53,6 +53,13 @@ public:
     bool operator>=(const Measure &rhs) const {
         return !(*this < rhs);
     }
+
+    T operator+(const Measure& rhs) const {
+        return T(inBaseUnits + rhs.inBaseUnits);
+    }
+    T operator-(const Measure& rhs) const {
+        return T(inBaseUnits - rhs.inBaseUnits);
+    }
 };
 
 class Distance : public Measure<Distance> {

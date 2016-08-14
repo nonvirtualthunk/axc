@@ -18,6 +18,13 @@ public:
     GameApplication();
 
 protected:
+    virtual void init() override;
+
+    virtual void loop() override;
+
+    virtual void shutdown() override;
+
+protected:
     virtual void onEvent(std::shared_ptr<Event> e) override;
 
     virtual void update(Time dt) override;

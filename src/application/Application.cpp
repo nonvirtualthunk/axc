@@ -15,6 +15,7 @@
 #include <thread>
 #include <glm/ext.hpp>
 #include <core/Predef.h>
+#include <graphics/AxGL.h>
 
 
 GLFWwindow* window;
@@ -30,6 +31,11 @@ void Application::run() {
     init();
     loop();
 
+    shutdown();
+}
+
+void Application::shutdown() {
+
     glfwDestroyWindow(window);
 
     glfwTerminate();
@@ -37,10 +43,10 @@ void Application::run() {
 
 void Application::loop() {
     glClearColor(0, 0, 0, 1);
-    glViewport(0, 0, 800, 600);
 
     double lastTime = glfwGetTime();
     while (!glfwWindowShouldClose(window)) {
+        AxGL::setViewport(0,0,frameDimensions.x,frameDimensions.y);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         double curTime = glfwGetTime();
@@ -54,6 +60,7 @@ void Application::loop() {
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+        lastSwap = Milliseconds(epochMillisSteady());
     }
 }
 
@@ -100,6 +107,11 @@ void Application::init() {
     glfwSwapInterval(swapInterval); // Neither 0 nor 1 make any significant difference
     // Make the window visible
     glfwShowWindow(window);
+
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_CULL_FACE);
 }
 
 void Application::updateWindowDimensions() {
@@ -127,4 +139,8 @@ void Application::keyCallback(GLFWwindow *win, int key, int scancode, int action
     Application::inst->onEvent(evt);
 
     Noto::info("Key event called back: {}",key);
+}
+
+Time Application::nextExpectedSwap() const {
+    return lastSwap + Seconds(1/60.0f);
 }

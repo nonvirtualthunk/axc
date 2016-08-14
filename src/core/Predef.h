@@ -10,6 +10,7 @@
 #include <Combinators.h>
 #include <containers/Seq.h>
 #include <containers/ArxMap.h>
+#include <containers/ArxSet.h>
 
 template<typename T>
 Optional<T> some(const T &t) {
@@ -33,7 +34,17 @@ Arx::Sequence<T> Seq( std::initializer_list<T> list )
 
 
 template <typename T>
-std::set<T> Set( std::initializer_list<T> list )
+Arx::Set<T> Set( std::initializer_list<T> list )
+{
+    Arx::Set<T> set;
+    for( auto elem : list ) {
+        set.add(elem);
+    }
+    return set;
+}
+
+template <typename T>
+std::set<T> StdSet( std::initializer_list<T> list )
 {
     std::set<T> set;
     for( auto elem : list ) {
@@ -47,9 +58,22 @@ Arx::Map<K,V> Map() {
     return Arx::Map<K,V>();
 };
 
-template <typename Coll>
-std::set<typename Coll::value_type> toSet(const Coll& coll) {
+template<typename Coll>
+std::set<typename Coll::value_type> toStdSet(const Coll& coll) {
     return std::set<typename Coll::value_type>(coll.begin(), coll.end());
+}
+
+
+template <typename Coll>
+Arx::Set<typename Coll::value_type> toSet(const Coll& coll) {
+    Arx::Set<typename Coll::value_type> ret;
+    auto iter = coll.begin();
+    auto end = coll.end();
+    while (iter != end) {
+        ret.add(*iter);
+        ++iter;
+    }
+    return ret;
 }
 
 class IdCounter {
@@ -81,6 +105,20 @@ int getNextTaggedId() {
 
 inline bool isBitSet(int combinedValue, int bit) {
     return (combinedValue & bit) == bit;
+}
+
+inline int
+pow2roundup (int x)
+{
+    if (x < 0)
+        return 0;
+    --x;
+    x |= x >> 1;
+    x |= x >> 2;
+    x |= x >> 4;
+    x |= x >> 8;
+    x |= x >> 16;
+    return x+1;
 }
 
 long long int epochMillisSteady();

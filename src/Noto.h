@@ -22,6 +22,13 @@ public:
     static int logLevel;
 
     template<typename... Args>
+    static void fine(const char *fmt, const Args &... args) {
+        if (checkLevel(FINE_LEVEL)) {
+            log(INFO_LEVEL,fmt,args...);
+        }
+    }
+
+    template<typename... Args>
     static void info(const char *fmt, const Args &... args) {
         log(INFO_LEVEL,fmt,args...);
     }

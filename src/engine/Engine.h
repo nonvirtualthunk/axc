@@ -51,14 +51,13 @@ public:
 
             threads.push_back(std::thread([=](){
                 for (ComponentType* comp : lockedComps) {
-                    comp->lastUpdated = std::chrono::steady_clock::now();
+                    comp->lastUpdated = Milliseconds(epochMillisSteady());
                 }
                 while (!endSignal) {
                     auto started = std::chrono::steady_clock::now();
                     for (ComponentType* comp : lockedComps) {
-                        auto cur = std::chrono::steady_clock::now();
-                        auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(cur - comp->lastUpdated);
-                        Time dt = Milliseconds(delta.count());
+                        auto cur = Milliseconds(epochMillisSteady());
+                        auto dt = cur - comp->lastUpdated;
                         if (dt > comp->updateInterval()) {
                             comp->updateRaw(dt);
                             comp->lastUpdated = cur;
@@ -73,6 +72,7 @@ public:
     }
 
     void exit() {
+        endSignal = true;
         for (std::thread& thread : threads) {
             thread.join();
         }
@@ -83,8 +83,7 @@ template<typename EngineType>
 class EngineComponent {
 public:
     typedef EngineType engine_type;
-    std::chrono::steady_clock::time_point lastUpdated;
-
+    Time lastUpdated = Seconds(0);
 
 
     virtual Time updateInterval() {
@@ -100,6 +99,10 @@ public:
     virtual void updateComp(Time dt) = 0;
 
     virtual void update(Time dt) = 0;
+
+    Time deltaSinceLastUpdate() {
+        return lastUpdated - lastUpdated;
+    }
 };
 
 class GameComponent;
@@ -108,6 +111,8 @@ class GameEngine : public Engine<GameComponent> {
 
 public:
     World * world;
+
+    GameEngine();
 
 };
 
@@ -143,11 +148,15 @@ protected:
     EventBus::Watcher graphicsBus;
 
 public:
+    Time lastDrawn;
+
     GraphicsComponent(GraphicsEngine *graphicsEngine);
 
     virtual void draw() = 0;
 
     virtual void updateComp(Time dt) override;
+
+    Time nextExpectedSwap() const;
 };
 
 

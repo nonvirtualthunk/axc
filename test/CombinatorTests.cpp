@@ -24,7 +24,7 @@ TEST_CASE("Map function on vec", "[combinators]") {
 
 TEST_CASE("Conversion to set","[containers]") {
     auto vec1 = Seq({2, 8, 4, 2});
-    auto set1 = toSet(vec1);
+    auto set1 = toStdSet(vec1);
 
     REQUIRE(set1.size() == 3);
     REQUIRE(contains(set1, 8));
@@ -35,11 +35,11 @@ TEST_CASE("Filter combinator","[combinators]") {
 
     REQUIRE(filter(vec1,[](int v) { return v % 2 == 0; }) == Seq({2,4}));
 
-    auto set1 = toSet(vec1);
+    auto set1 = toStdSet(vec1);
     REQUIRE(set1.size() == 4);
 
-    REQUIRE(filter(set1,[](int v) { return v % 2 == 0; }) == Set({2,4}));
-    REQUIRE(filterNot(set1,[](int v) { return v % 2 == 0; }) == Set({1,3}));
+    REQUIRE(filter(set1,[](int v) { return v % 2 == 0; }) == StdSet({2,4}));
+    REQUIRE(filterNot(set1,[](int v) { return v % 2 == 0; }) == StdSet({1,3}));
 }
 
 TEST_CASE("Chained seq combinators","[combinators][seq]") {

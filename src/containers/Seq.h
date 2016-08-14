@@ -38,6 +38,12 @@ namespace Arx {
         const T& operator[](int i) const {
             return intern[i];
         }
+        T& operator()(int i) {
+            return intern[i];
+        }
+        const T& operator()(int i) const {
+            return intern[i];
+        }
 
         template<typename Op>
         Sequence<T> filter(Op op) const {
