@@ -19,6 +19,7 @@
 
 
 GLFWwindow* window;
+GLFWmonitor* fullscreenMonitor;
 Application* Application::inst = NULL;
 
 
@@ -77,18 +78,20 @@ void Application::init() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_RESIZABLE, resizable); // the window will be resizable
+    glfwWindowHint(GLFW_DECORATED, false);
 
     glfwSetErrorCallback([](int errCode, const char *msg) {
         Noto::error("GLFW error[{}]: {}", errCode, msg);
     });
 
 
+    fullscreenMonitor = glfwGetPrimaryMonitor();
     GLFWmonitor * monitor = NULL;
     if (fullscreen) {
         auto vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         windowDimensions.x = vidMode->width;
         windowDimensions.y = vidMode->height;
-        monitor = glfwGetPrimaryMonitor();
+        monitor = fullscreenMonitor;
     }
     window = glfwCreateWindow(windowDimensions.x, windowDimensions.y, windowTitle, monitor, NULL);
     if (!window) {
@@ -97,8 +100,15 @@ void Application::init() {
     }
 
     updateWindowDimensions();
+    glfwGetWindowPos(window, &windowPosition.x, &windowPosition.y);
 
     glfwSetKeyCallback(window,Application::keyCallback);
+    glfwSetWindowSizeCallback(window,Application::windowCallback);
+    glfwSetMouseButtonCallback(window, Application::mouseButtonCallback);
+    glfwSetCursorPosCallback(window, Application::mouseMoveCallback);
+    glfwSetScrollCallback(window, Application::scrollCallback);
+    glfwSetCharModsCallback(window, Application::charCallback);
+    glfwSetWindowPosCallback(window, Application::windowPosCallback);
 
     // Make the OpenGL context current
     glfwMakeContextCurrent(window);
@@ -121,11 +131,33 @@ void Application::updateWindowDimensions() {
     Noto::info("Frame buffer size: {}", glm::to_string(frameDimensions));
 }
 
+Time Application::nextExpectedSwap() const {
+    return lastSwap + Seconds(1/60.0f);
+}
+
 void Application::keyCallback(GLFWwindow *win, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_Q && (isBitSet(mods,GLFW_MOD_CONTROL) || isBitSet(mods,GLFW_MOD_SUPER))) {
         glfwSetWindowShouldClose(win,true);
     } else if (key == GLFW_KEY_F5 && action == GLFW_PRESS) {
         Application::inst->fullPause = ! Application::inst->fullPause;
+    } else if (key == GLFW_KEY_F11 && action == GLFW_PRESS) {
+        auto inst = Application::inst;
+        if (!inst->fullscreen) {
+            auto vidMode = glfwGetVideoMode(fullscreenMonitor);
+            inst->savedWindowedDimensions = inst->windowDimensions;
+            inst->savedWindowedPosition = inst->windowPosition;
+            inst->windowDimensions.x = vidMode->width;
+            inst->windowDimensions.y = vidMode->height;
+            auto monitor = fullscreenMonitor;
+
+            glfwSetWindowMonitor(win,monitor,0,0,vidMode->width,vidMode->height,vidMode->refreshRate);
+        } else {
+            glfwSetWindowMonitor(win,nullptr,
+                                 inst->savedWindowedPosition.x,inst->savedWindowedPosition.y,
+                                 inst->savedWindowedDimensions.x,inst->savedWindowedDimensions.y,
+                                 GLFW_DONT_CARE);
+        }
+        inst->fullscreen = !inst->fullscreen;
     }
 
     if (action == GLFW_PRESS) {
@@ -137,10 +169,39 @@ void Application::keyCallback(GLFWwindow *win, int key, int scancode, int action
 
     auto evt = std::make_shared<KeyEvent>(key,action == GLFW_PRESS,KeyModifiers(mods));
     Application::inst->onEvent(evt);
-
-    Noto::info("Key event called back: {}",key);
 }
 
-Time Application::nextExpectedSwap() const {
-    return lastSwap + Seconds(1/60.0f);
+void Application::windowCallback(GLFWwindow * win, int width, int height) {
+    Application::inst->updateWindowDimensions();
+}
+
+void Application::mouseButtonCallback(GLFWwindow *win, int button, int action, int mods) {
+    auto evt = std::make_shared<MouseButtonEvent>(
+            MouseMirror::getCurrentMousePosition(), action == GLFW_PRESS, KeyModifiers(mods));
+    Application::inst->onEvent(evt);
+}
+
+void Application::mouseMoveCallback(GLFWwindow *win, double x, double y) {
+    glm::vec2 pos(x,y);
+    glm::vec2 old = MouseMirror::getCurrentMousePosition();
+    MouseMirror::setMousePosition(pos);
+    bool isDrag = MouseMirror::isLeftDown() || MouseMirror::isRightDown();
+    auto evt = std::make_shared<MouseMoveEvent>(!isDrag,isDrag,pos, pos - old, KeyboardMirror::getActiveModifiers());
+    Application::inst->onEvent(evt);
+}
+
+void Application::scrollCallback(GLFWwindow *win, double dx, double dy) {
+    glm::vec2 delta(dx,dy);
+    auto evt = std::make_shared<ScrollEvent>(delta, KeyboardMirror::getActiveModifiers());
+    Application::inst->onEvent(evt);
+}
+
+void Application::charCallback(GLFWwindow *win, unsigned int codePoint, int mods) {
+    auto evt = std::make_shared<CharEvent>(codePoint, KeyModifiers(mods));
+    Application::inst->onEvent(evt);
+}
+
+void Application::windowPosCallback(GLFWwindow *win, int x, int y) {
+    Noto::info("Window pos recorded: {}, {}", x, y);
+    Application::inst->windowPosition = glm::ivec2(x,y);
 }

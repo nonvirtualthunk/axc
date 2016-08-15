@@ -49,7 +49,7 @@ public:
 class TextureBlock : public Texture {
 protected:
     struct Cell {
-        Rect location;
+        Rect<int> location;
         bool rotated;
         glm::vec2 texCoords[4];
     };

@@ -8,6 +8,5 @@ in vec4 colorV;
 out vec4 o_FragColor;
 
 void main (){
-    //o_FragColor = texture(tex0,texCoordV) * colorV;
-    o_FragColor = vec4(1,0,1,1);
+    o_FragColor = texture(tex0,texCoordV) * colorV;
 }

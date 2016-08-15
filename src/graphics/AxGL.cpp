@@ -45,3 +45,7 @@ void AxGL::setViewport(int x, int y, int w, int h) {
         v.h = h;
     }
 }
+
+float AxGL::aspectRatio() {
+    return (float)AxGL::activeViewport.w / (float)AxGL::activeViewport.h;
+}

@@ -29,11 +29,12 @@ void Texture::commit(glm::ivec2 min, glm::ivec2 max) {
     Texture::bind(0, name);
 
     if (!floatTexture) {
-        glEnable(GL_TEXTURE_2D);
+        AxGL::checkError();
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
+        AxGL::checkError();
 
         if (mipmap) {
             int maxLevels = (int) (log(std::min(image->width, image->height)) / log(2));

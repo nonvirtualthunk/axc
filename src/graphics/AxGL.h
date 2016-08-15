@@ -24,6 +24,7 @@ public:
 
     static void checkError();
     static void setViewport(int x,int y,int w,int h);
+    static float aspectRatio();
 };
 
 #endif //TEST2_AXGL_H

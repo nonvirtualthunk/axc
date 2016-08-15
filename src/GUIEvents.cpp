@@ -9,6 +9,9 @@
 
 bool* const KeyboardMirror::keyStates = new bool[GLFW_KEY_LAST];
 KeyModifiers KeyboardMirror::activeModifiers(0);
+glm::vec2 MouseMirror::mousePosition = glm::vec2(0.0f,0.0f);
+bool MouseMirror::leftDown = false;
+bool MouseMirror::rightDown = false;
 
 bool KeyModifiers::ctrl() {
     return isBitSet(modifierSet, GLFW_KEY_LEFT_CONTROL) ||
@@ -27,10 +30,10 @@ bool KeyModifiers::alt() {
            isBitSet(modifierSet, GLFW_KEY_RIGHT_ALT);
 }
 
-MouseMoveEvent::MouseMoveEvent(const bool isMove, const bool isScroll,
+MouseMoveEvent::MouseMoveEvent(const bool isMove,
                                        const bool isDrag, const glm::vec2 &mousePosition, const glm::vec2 &delta,
                                        const KeyModifiers &modifiers) : Event(MouseMoveEventType), isMove(isMove),
-                                                                        isScroll(isScroll), isDrag(isDrag),
+                                                                        isDrag(isDrag),
                                                                         mousePosition(mousePosition), delta(delta),
                                                                         modifiers(modifiers) {}
 
@@ -40,3 +43,10 @@ KeyEvent::KeyEvent(const int key, const bool isPress, const KeyModifiers &modifi
 MouseButtonEvent::MouseButtonEvent(const glm::vec2 &mousePosition, const bool isPress,
                                    const KeyModifiers &modifiers) : Event(MouseButtonEventType), mousePosition(mousePosition),
                                                                     isPress(isPress), modifiers(modifiers) {}
+
+ScrollEvent::ScrollEvent(const glm::vec2 &delta, const KeyModifiers &modifiers) : Event(ScrollEventType),
+                                                                                  delta(delta),
+                                                                                  modifiers(modifiers) {}
+
+CharEvent::CharEvent(unsigned int codePoint, const KeyModifiers &modifiers) :
+        Event(CharEventType), codePoint(codePoint), modifiers(modifiers) {}
