@@ -66,6 +66,14 @@ public:
     ScrollEvent(const glm::vec2 &delta, const KeyModifiers &modifiers);
 };
 
+NEW_EVENT_TYPE(ResizeEvent) {
+public:
+    const glm::vec2 windowDimensions;
+    const glm::vec2 framebufferDimensions;
+
+    ResizeEvent(const glm::vec2 &windowDimensions, const glm::vec2 &framebufferDimensions);
+};
+
 
 class KeyboardMirror {
 protected:

@@ -49,14 +49,16 @@ TEST_CASE("Game engine threading","[engine][concurrency]") {
     REQUIRE(comp->testValue == 1);
 
     engine.start();
-
     this_thread::sleep_for(chrono::milliseconds(250));
+    int startCount = comp->updateCount;
+
+    this_thread::sleep_for(chrono::milliseconds(1000));
 
     engine.endSignal = true;
     engine.exit();
 
-    REQUIRE(comp->updateCount > (int)((250/8) * 0.40));
-    REQUIRE(comp->updateCount < (int)((250/8) * 1.00));
+    REQUIRE((comp->updateCount - startCount) > (int)((1000/8) * 0.40));
+    REQUIRE((comp->updateCount - startCount) < (int)((1000/8) * 1.00));
 }
 
 TEST_CASE("gameEngineEventBus","[engine][event]") {

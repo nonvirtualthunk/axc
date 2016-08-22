@@ -7,19 +7,27 @@
 
 #include "core/Predef.h"
 
+#include <graphics/Shader.h>
+#include <graphics/Image.h>
+#include <gui/Font.h>
+
 
 Arx::String readAll(const char * path) {
     std::ifstream vStream;
     vStream.open(path);
+    if (vStream.good()) {
+        std::string line;
+        Arx::String all;
 
-    std::string line;
-    Arx::String all;
-
-    while (std::getline(vStream, line, '\n')) {
-        all.append(line.c_str());
-        all.append('\n');
+        while (std::getline(vStream, line, '\n')) {
+            all.append(line.c_str());
+            all.append('\n');
+        }
+        return all;
+    } else {
+        Noto::error("Could not read non existent file: {}", path);
+        throw "Could not read non existent file";
     }
-    return all;
 }
 
 
@@ -50,4 +58,9 @@ std::shared_ptr<Image> ResourceManager::image(const std::string &path) {
 
 std::string ResourceManager::adjustedPath(const std::string &path) {
     return "resources/" + path;
+}
+
+std::shared_ptr<Font> ResourceManager::font(const std::string &path, TextureBlock * tb) {
+    auto apath = adjustedPath(path);
+    return Font::fromFile(apath.c_str(),tb);
 }

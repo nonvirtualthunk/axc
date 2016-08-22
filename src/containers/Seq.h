@@ -28,6 +28,31 @@ namespace Arx {
         void add(const T& t) {
             intern.push_back(t);
         }
+        template<typename Coll>
+        void addAll(const Coll& coll) {
+            for (const T& t : coll) {
+                add(t);
+            }
+        }
+
+        void push(const T& t) {
+            intern.push_back(t);
+        }
+        void pop() {
+            intern.pop_back();
+        }
+
+        /**
+         * Pops the back element from this sequence if it is equal to the given expected value,
+         * otherwise leaves the sequence unchanged.
+         * @param expected the value that is expected to be at the back
+         * @return true if the expected was found and removed, false otherwise
+         */
+        bool pop(const T& expected) {
+            bool ret = intern.back() == expected;
+            if (ret) intern.pop_back();
+            return ret;
+        }
         void insert(const_iterator iter, const T& t) {
             intern.insert(iter,t);
         }
@@ -58,6 +83,15 @@ namespace Arx {
         template<typename Op>
         Sequence<T> map(Op op) const {
             return Sequence(comb::fmap(*this, op));
+        }
+
+        bool contains(const T& needle) const {
+            for (const T& t : intern) {
+                if (t == needle) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         unsigned long size() const {

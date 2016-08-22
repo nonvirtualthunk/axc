@@ -9,8 +9,10 @@
 #include <core/AuxData.h>
 #include <thread>
 #include <Event.h>
+#include <Noto.h>
 
 class World;
+class WindowingSystem;
 
 template<typename ComponentType>
 class Engine {
@@ -51,12 +53,12 @@ public:
 
             threads.push_back(std::thread([=](){
                 for (ComponentType* comp : lockedComps) {
-                    comp->lastUpdated = Milliseconds(epochMillisSteady());
+                    comp->lastUpdated = Nanoseconds(epochNanosSteady());
                 }
                 while (!endSignal) {
-                    auto started = std::chrono::steady_clock::now();
+                    auto started = std::chrono::high_resolution_clock::now();
                     for (ComponentType* comp : lockedComps) {
-                        auto cur = Milliseconds(epochMillisSteady());
+                        auto cur = Nanoseconds(epochNanosSteady());
                         auto dt = cur - comp->lastUpdated;
                         if (dt > comp->updateInterval()) {
                             comp->updateRaw(dt);
@@ -166,8 +168,12 @@ class ControlEngine : public Engine<ControlComponent> {
 public:
     GameEngine* gameEngine;
     GraphicsEngine* graphicsEngine;
+    WindowingSystem* windowingSystem;
+    AuxDataContainer<ControlAuxData<void>> controlData;
 
     ControlEngine(GameEngine *gameEngine, GraphicsEngine *graphicsEngine);
+
+    void draw();
 };
 
 class ControlComponent : public EngineComponent<ControlEngine> {
@@ -179,9 +185,20 @@ protected:
     EventBus::Watcher controlBus;
 
 public:
+    Time lastDrawn;
+
     ControlComponent(ControlEngine *controlEngien);
 
     virtual void updateComp(Time dt) override;
+
+    virtual void draw(){}
+
+    Time nextExpectedSwap() const;
+
+    template<typename T>
+    typename T::associated_type &aux(T adt) {
+        return controlEngine->controlData.aux(adt);
+    }
 };
 
 #endif //TEST2_GAMEENGINE_H

@@ -12,20 +12,21 @@
 #include <mutex>
 #include <glad/glad.h>
 #include "Image.h"
+#include <rbp/MaxRectsBinPack.h>
 
 class Texture {
 protected:
+    // OpenGL data
+    GLuint name = 0;
     int committedRevision = 0;
 public:
     typedef std::shared_ptr<Texture> ptrType;
     std::shared_ptr<Image> image;
 
-    int revision = 1;
+    std::atomic_int revision;
 
     float floatTexture = false;
 
-    // OpenGL data
-    GLuint name = 0;
     GLenum minFilter = GL_NEAREST;
     GLenum magFilter = GL_NEAREST;
     GLenum wrap = GL_CLAMP_TO_EDGE;
@@ -48,17 +49,28 @@ public:
 
 class TextureBlock : public Texture {
 protected:
-    struct Cell {
-        Rect<int> location;
-        bool rotated;
-        glm::vec2 texCoords[4];
-    };
-
     std::mutex mapLock;
-public:
-    Arx::Map<int,Cell> imageLocations;
 
-    TextureBlock(const std::shared_ptr<Image> &image);
+    rbp::MaxRectsBinPack binPack;
+public:
+    struct Cell {
+        Rect<int> location = Rect<int>();
+        bool rotated = false;
+        glm::vec2 texCoords[4];
+        Rect<float> texCoordRect;
+
+        Cell();
+    };
+    int border = 1;
+public:
+
+    Arx::Map<int,Cell> imageCells;
+
+    TextureBlock(const ImagePtr &image);
+    TextureBlock(int w,int h);
+
+    const Cell& getOrElseUpdateCell(const ImagePtr& newImage);
+    const Cell& getOrElseUpdateCell(const Image& newImage);
 };
 
 

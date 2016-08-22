@@ -13,4 +13,4 @@
 //    //ASSERT_EQ(Kilometers(2).in(Meters),2000.0f) << "Kilometer to meter conversion failed";
 //    ASSERT_EQ(3,2) << "TEST";
 //}
-Time::Time(float inBase) : Measure(inBase) {}
+Time::Time(double inBase) : Measure(inBase) {}

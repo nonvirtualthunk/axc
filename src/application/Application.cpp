@@ -43,7 +43,7 @@ void Application::shutdown() {
 }
 
 void Application::loop() {
-    glClearColor(0, 0, 0, 1);
+    glClearColor(0.0, 0.0, 0.0, 1);
 
     double lastTime = glfwGetTime();
     while (!glfwWindowShouldClose(window)) {
@@ -129,6 +129,9 @@ void Application::updateWindowDimensions() {
     Noto::info("Current window size: {}", glm::to_string(windowDimensions));
     glfwGetFramebufferSize(window, &frameDimensions.x, &frameDimensions.y);
     Noto::info("Frame buffer size: {}", glm::to_string(frameDimensions));
+
+    auto evt = std::make_shared<ResizeEvent>(windowDimensions, frameDimensions);
+    onEvent(evt);
 }
 
 Time Application::nextExpectedSwap() const {

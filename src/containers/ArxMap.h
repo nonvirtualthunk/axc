@@ -81,5 +81,82 @@ namespace Arx {
             return map.end();
         }
     };
+
+//    template<typename K, typename V>
+//    class AtomicMap {
+//    protected:
+//        typedef std::unordered_map<K, V, DelegatingHasher<K>> MapType;
+//        MapType map;
+//
+//        std::recursive_mutex lock;
+//
+//    public:
+//        typedef typename MapType::iterator IteratorType;
+//        typedef typename MapType::const_iterator ConstIteratorType;
+//
+//        const Optional<V> get(const K &k) const {
+//            std::lock_guard<std::recursive_mutex> guard(lock);
+//            const auto res = map.find(k);
+//            if (res == map.end()) {
+//                return Optional<V>::none();
+//            } else {
+//                return Optional<V>::some(res->second);
+//            }
+//        }
+//
+//        V &getOrElseUpdate(const K &k, std::function<V()> vfunc) {
+//            std::lock_guard<std::recursive_mutex> guard(lock);
+//            typename MapType::iterator res = map.find(k);
+//            if (res == map.end()) {
+//                put(k, vfunc());
+//                return map[k];
+//            } else {
+//                return res->second;
+//            }
+//        }
+//
+//        V getOrElse(const K& k, std::function<V()> vfunc) const {
+//            return get(k).orElse(vfunc);
+//        }
+//
+//        V getOrElse(const K& k, const V& v) const {
+//            return get(k).orElse(v);
+//        }
+//
+//        bool contains(const K &k) const {
+//            std::lock_guard<std::recursive_mutex> guard(lock);
+//            return map.find(k) == map.end();
+//        }
+//
+//        void put(const K &k, const V &v) {
+//            std::lock_guard<std::recursive_mutex> guard(lock);
+//            auto res = map.emplace(k,v);
+//            if (!res.second) {
+//                res.first->second = v;
+//            }
+//        }
+//
+//        void foreach(std::function<void(K,V)> func) {
+//            std::lock_guard<std::recursive_mutex> guard(lock);
+//            auto iter = map.begin();
+//            auto end = map.end();
+//            while (iter != end) {
+//                func(iter->first, iter->second);
+//                iter++;
+//            }
+//        }
+//
+//        size_t size() const {
+//            std::lock_guard<std::recursive_mutex> guard(lock);
+//            return map.size();
+//        }
+//
+//        ConstIteratorType begin() const {
+//            return map.begin();
+//        }
+//        ConstIteratorType end() const {
+//            return map.end();
+//        }
+//    };
 }
 #endif //TEST2_ARXMAP_H

@@ -26,6 +26,9 @@ void GraphicsComponent::updateComp(Time dt) {
 Time GraphicsComponent::nextExpectedSwap() const {
     return Application::inst->nextExpectedSwap();
 }
+Time ControlComponent::nextExpectedSwap() const {
+    return Application::inst->nextExpectedSwap();
+}
 
 GraphicsEngine::GraphicsEngine(GameEngine *gameEngine) : gameEngine(gameEngine) {}
 
@@ -54,7 +57,9 @@ ControlComponent::ControlComponent(ControlEngine *controlEngine) :
         world(controlEngine->graphicsEngine->gameEngine->world),
         controlBus(controlEngine->eventBus.watcher()),
         gameBus(controlEngine->gameEngine->eventBus.watcher()),
-        graphicsBus(controlEngine->graphicsEngine->eventBus.watcher()) {}
+        graphicsBus(controlEngine->graphicsEngine->eventBus.watcher()),
+        lastDrawn(Milliseconds(epochMillisSteady()))
+{}
 
 void ControlComponent::updateComp(Time dt) {
     gameBus.update();
@@ -69,6 +74,13 @@ ControlEngine::ControlEngine(GameEngine *gameEngine, GraphicsEngine *graphicsEng
         graphicsEngine(graphicsEngine)
 {
 
+}
+
+void ControlEngine::draw() {
+    for (ControlComponent * comp : components) {
+        comp->draw();
+        comp->lastDrawn = Milliseconds(epochMillisSteady());
+    }
 }
 
 GameEngine::GameEngine() : world(new World()) {}

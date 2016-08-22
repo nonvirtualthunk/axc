@@ -3,6 +3,7 @@
 //
 
 #include <core/Predef.h>
+#include <Noto.h>
 #include "Image.h"
 
 #define STBI_ONLY_PNG
@@ -10,11 +11,15 @@
 
 #include "stb/stb_image.h"
 
-Image::Image(const unsigned char *data, int width, int height, const std::string &loadedFrom) :
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+
+#include <stb/stb_image_write.h>
+
+Image::Image(unsigned char * data, int width, int height, const Optional<std::string> &loadedFrom) :
         data(data),
         width(width),
         height(height),
-        loadedFrom(some(loadedFrom)),
+        loadedFrom(loadedFrom),
         components(4) {
     assignUID();
 }
@@ -30,12 +35,20 @@ Image::Image(int width, int height) :
 
 Image::Image(const std::string &loadFrom) : loadedFrom(some(loadFrom)), components(4) {
     int comp;
+    stbi_set_flip_vertically_on_load(true);
     data = stbi_load(loadFrom.c_str(),&width,&height,&comp,components);
+    if (data == nullptr) {
+        Noto::warn("Failed to load image from {}", loadFrom);
+    }
     assignUID();
 }
 
-std::shared_ptr<Image> Image::load(const std::string &loadFrom) {
+ImagePtr Image::load(const std::string &loadFrom) {
     return std::make_shared<Image>(loadFrom);
+}
+
+ImagePtr Image::ofDimensions(int width, int height) {
+    return std::make_shared<Image>(width, height);
 }
 
 
@@ -54,4 +67,23 @@ bool Image::operator==(const Image &rhs) const {
 
 bool Image::operator!=(const Image &rhs) const {
     return !(rhs == *this);
+}
+
+std::shared_ptr<Image> Image::sentinel() {
+    static std::shared_ptr<Image> tmp(new Image(nullptr,0,0,none<std::string>()));
+    return tmp;
+}
+
+void Image::copySection(const unsigned char *from, int startX, int startY, int numPixels) {
+    if (startY + numPixels >= width) {
+        Noto::error("Attempted to copy more than a single row of data into image");
+    } else {
+        unsigned char * ptr = data + width * startY * components + startX * components;
+        memcpy(ptr, from, (size_t) (numPixels * components));
+    }
+}
+
+void Image::writeToFile(const char *path) {
+    unsigned char * endRow = row(height-1);
+    stbi_write_png(path,width,height,components,endRow,-width * components);
 }

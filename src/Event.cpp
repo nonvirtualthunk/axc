@@ -59,6 +59,7 @@ Optional<EventPtr> EventBus::AsyncIterator::next() {
     std::lock_guard<std::mutex> guard(bus.mutex);
 
     while (mostRecentIndex > 0 &&
+            bus.events.size() >= mostRecentIndex &&
            bus.events[mostRecentIndex-1]->id != mostRecentId) {
         mostRecentIndex--;
     }

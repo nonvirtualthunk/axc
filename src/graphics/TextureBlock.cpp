@@ -9,6 +9,7 @@
 #include "AxGL.h"
 #include <glad/glad.h>
 
+
 void Texture::bind(int n) {
     if (name == 0 || committedRevision < revision) {
         commit();
@@ -25,7 +26,7 @@ void Texture::commit(glm::ivec2 min, glm::ivec2 max) {
     if (name == 0) {
         glGenTextures(1, &name);
     }
-    int boundBefore = AxGL::boundTextures[0];
+    GLuint boundBefore = AxGL::boundTextures[0];
     Texture::bind(0, name);
 
     if (!floatTexture) {
@@ -76,7 +77,7 @@ void Texture::bind(int n, GLuint name) {
     }
 }
 
-Texture::Texture(const shared_ptr<Image> &image) : image(image) {}
+Texture::Texture(const shared_ptr<Image> &image) : image(image), revision(1) {}
 
 Texture::ptrType Texture::fromImage(std::shared_ptr<Image> image) {
     return std::make_shared<Texture>(image);
@@ -86,8 +87,50 @@ Texture::ptrType Texture::load(const std::string fromFile) {
     return std::make_shared<Texture>(Image::load(fromFile));
 }
 
-TextureBlock::TextureBlock(const shared_ptr<Image> &image) :
-        Texture(image)
-{
+TextureBlock::TextureBlock(const ImagePtr &image) :
+        Texture(image),
+        binPack(image->width, image->height) {
 
 }
+
+TextureBlock::TextureBlock(int w, int h) :
+        TextureBlock(Image::ofDimensions(w,h)) {
+
+}
+
+const TextureBlock::Cell &TextureBlock::getOrElseUpdateCell(const ImagePtr &newImage) {
+    return getOrElseUpdateCell(*newImage);
+    
+}
+
+const TextureBlock::Cell &TextureBlock::getOrElseUpdateCell(const Image &newImage) {
+    std::lock_guard<std::mutex> guard(mapLock);
+    return imageCells.getOrElseUpdate(newImage.uid, [this, newImage]() {
+        int targetWidth = newImage.width + border * 2;
+        int targetHeight = newImage.height + border * 2;
+        rbp::Rect res = binPack.Insert(targetWidth, targetHeight, rbp::MaxRectsBinPack::RectBestAreaFit);
+
+        Cell newCell;
+        if (res.width == targetWidth) {
+            newCell.rotated = true;
+        }
+        newCell.location = Rect<int>(res.x + border, res.y + border, res.width - border * 2, res.height - border * 2);
+        newCell.texCoordRect = Rect<float>(newCell.location.x / float(image->width),
+                                           newCell.location.y / float(image->height),
+                                           newCell.location.width / float(image->width),
+                                           newCell.location.height / float(image->height));
+        newCell.texCoords[0] = newCell.texCoordRect.xy();
+        newCell.texCoords[1] = newCell.texCoordRect.xy() + glm::vec2(newCell.texCoordRect.width,0.0f);
+        newCell.texCoords[2] = newCell.texCoordRect.xy() + glm::vec2(newCell.texCoordRect.width,newCell.texCoordRect.height);
+        newCell.texCoords[3] = newCell.texCoordRect.xy() + glm::vec2(0.0f,newCell.texCoordRect.height);
+
+        for (int y = 0; y < newImage.height; ++y) {
+            image->copySection(newImage.row(y), newCell.location.x, newCell.location.y + y, newImage.width);
+        }
+        revision.fetch_add(1);
+
+        return newCell;
+    });
+}
+
+TextureBlock::Cell::Cell() {}

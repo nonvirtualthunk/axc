@@ -23,6 +23,10 @@ namespace Arx {
         return intern.find(str.c_str()) >= 0;
     }
 
+    bool String::endsWith(const std::string& str) const {
+        return intern.find(str.c_str()) == this->size() - str.length();
+    }
+
     String::String(const char *raw) :intern(raw){
 
     }
@@ -99,6 +103,12 @@ namespace Arx {
 
     const char *String::raw() const {
         return intern;
+    }
+
+    String String::operator+(const char *other) const {
+        String ret = *this;
+        ret.append(other);
+        return ret;
     }
 
 

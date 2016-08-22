@@ -30,6 +30,7 @@ namespace Arx {
         }
 
         bool startsWith(const std::string& str) const;
+        bool endsWith(const std::string& str) const;
         bool contains(const std::string& str) const;
         String takeWhile(std::function<bool(char)> predicate) const;
         String trimmed() const;
@@ -44,6 +45,7 @@ namespace Arx {
         size_t hash() const;
         bool operator==(const String &rhs) const;
         bool operator!=(const String &rhs) const;
+        String operator+(const char * other) const;
     };
 
     std::ostream &operator<<(std::ostream &os, const Arx::String &string1);

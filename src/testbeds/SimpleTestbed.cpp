@@ -66,10 +66,12 @@ public:
     float theta = 0.0f;
     virtual void update(Time dt) override {
         theta = nextExpectedSwap().in(Seconds);
+//        theta += dt.in(Seconds);
     }
 
     virtual void draw() override {
-        float effTheta = theta;// + deltaSinceLastUpdate().in(Seconds);
+//        float effTheta = theta + deltaSinceLastUpdate().in(Seconds);
+        float effTheta = theta;
         AxGL::checkError();
         modelview = glm::lookAt(
                 glm::vec3(0.0f,0.0f,-10.0f),

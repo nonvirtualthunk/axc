@@ -7,13 +7,13 @@
 
 template<typename T> class UnitOfMeasure {
 public:
-    const float conversion;
+    const double conversion;
 
-    UnitOfMeasure(const float conv) : conversion(conv){
+    UnitOfMeasure(const double conv) : conversion(conv){
 
     }
 
-    T operator()(float amount) const {
+    T operator()(double amount) const {
         return T(amount * conversion);
     }
 };
@@ -21,13 +21,13 @@ public:
 
 template<typename T> class Measure {
 protected:
-    float inBaseUnits;
+    double inBaseUnits;
 
 public:
-    Measure(float inBase): inBaseUnits(inBase){}
+    Measure(double inBase): inBaseUnits(inBase){}
 
     float in (UnitOfMeasure<T> unit) const {
-        return inBaseUnits / unit.conversion;
+        return (float) (inBaseUnits / unit.conversion);
     }
 
     bool operator==(const Measure<T> &rhs) const {
@@ -64,11 +64,11 @@ public:
 
 class Distance : public Measure<Distance> {
 public:
-    Distance(float inBase): Measure(inBase) {}
+    Distance(double inBase): Measure(inBase) {}
 };
 class Time : public Measure<Time> {
 public:
-    Time(float inBase);
+    Time(double inBase);
 };
 
 using UnitOfDistance = UnitOfMeasure<Distance>;
@@ -81,6 +81,7 @@ const UnitOfDistance Kilometers(1000.0f);
 
 const UnitOfTime Seconds(1.0f);
 const UnitOfTime Milliseconds(0.001f);
+const UnitOfTime Nanoseconds(0.000000001f);
 const UnitOfTime Minutes(60.0f);
 const UnitOfTime Hours(Minutes.conversion * 60.0f);
 const UnitOfTime Days(Hours.conversion * 24.0f);

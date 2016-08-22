@@ -22,10 +22,10 @@ public:
     int swapInterval = 1;
     bool fullscreen = false;
     glm::ivec2 windowPosition = glm::ivec2(0,0);
-    glm::ivec2 windowDimensions = glm::ivec2(1680,1050);
+    glm::ivec2 windowDimensions = glm::ivec2(1440,900);
     glm::ivec2 savedWindowedDimensions = glm::ivec2(800,600);
     glm::ivec2 savedWindowedPosition = glm::ivec2(0,0);
-    glm::ivec2 frameDimensions = glm::ivec2(800,600);
+    glm::ivec2 frameDimensions = glm::ivec2(1440,900);
     Time lastSwap = Seconds(0);
 
     bool fullPause = false;

@@ -18,13 +18,16 @@ public:
 };
 
 template<typename Assoc>
-class WorldAuxData : AuxDataType<WorldAuxData<void>,Assoc>{};
+class WorldAuxData : public AuxDataType<WorldAuxData<void>,Assoc>{};
 
 template<typename Assoc>
-class EntityAuxData : AuxDataType<EntityAuxData<void>,Assoc>{};
+class EntityAuxData : public AuxDataType<EntityAuxData<void>,Assoc>{};
 
 template<typename Assoc>
-class GraphicsAuxData : AuxDataType<GraphicsAuxData<void>,Assoc>{};
+class GraphicsAuxData : public AuxDataType<GraphicsAuxData<void>,Assoc>{};
+
+template<typename Assoc>
+class ControlAuxData : public AuxDataType<ControlAuxData<void>,Assoc>{};
 
 template<typename ADT>
 class AuxDataContainer {
@@ -33,6 +36,10 @@ protected:
     void **auxData;
 
 public:
+    template<typename T>
+    typename T::associated_type &aux(T adt) {
+        return (*this)(adt);
+    }
     template<typename T>
     typename T::associated_type &operator()(T adt) {
         static_assert(std::is_same<ADT,typename T::base_type>::value,
@@ -62,6 +69,11 @@ protected:
 public:
     template<typename T>
     typename T::associated_type &operator()(T adt) {
+        return dataContainer(adt);
+    }
+
+    template<typename T>
+    typename T::associated_type &aux(T adt) {
         return dataContainer(adt);
     }
 };

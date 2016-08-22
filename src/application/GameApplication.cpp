@@ -22,6 +22,7 @@ void GameApplication::update(Time dt) {
 
 void GameApplication::draw() {
     graphicsEngine.draw();
+    controlEngine.draw();
 }
 
 

@@ -50,3 +50,7 @@ ScrollEvent::ScrollEvent(const glm::vec2 &delta, const KeyModifiers &modifiers) 
 
 CharEvent::CharEvent(unsigned int codePoint, const KeyModifiers &modifiers) :
         Event(CharEventType), codePoint(codePoint), modifiers(modifiers) {}
+
+ResizeEvent::ResizeEvent(const glm::vec2 &windowDimensions,
+                         const glm::vec2 &framebufferDimensions) : Event(ResizeEventType), windowDimensions(windowDimensions),
+                                                                   framebufferDimensions(framebufferDimensions) {}

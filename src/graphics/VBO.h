@@ -20,7 +20,8 @@ struct Attribute {
     bool normalize;
     bool rawInteger = false;
 
-    Attribute(int n, GLenum dataType, bool normalize = true) : n(n), dataType(dataType), normalize(normalize) {}
+    Attribute(int n, GLenum dataType, bool normalize = true, bool rawInteger = false) :
+            n(n), dataType(dataType), normalize(normalize), rawInteger(rawInteger) {}
 
     int byteSize() const {
         int base = 0;
@@ -32,6 +33,11 @@ struct Attribute {
             base = 1;
         }
         return base * n;
+    }
+
+    Attribute& withRawInteger(bool isRaw) {
+        rawInteger = isRaw;
+        return *this;
     }
 };
 
@@ -141,21 +147,23 @@ public:
     void drawElements(GLuint usage = GL_DYNAMIC_DRAW) {
         AxGL::checkError();
         solidifyIfNecessary(usage);
-        AxGL::checkError();
-        VAO::bind(vao);
-        AxGL::checkError();
-        GLenum indexType;
-        if (std::is_same<IT, uint16_t>::value) {
-            indexType = GL_UNSIGNED_SHORT;
-        } else if (std::is_same<IT, uint32_t>::value) {
-            indexType = GL_UNSIGNED_INT;
-        } else {
-            Noto::error("Cannot use a VBO with a index type other than [uint16_t, uint32_t]");
-            return;
+        if (indices.numSolidifiedElements > 0) {
+            AxGL::checkError();
+            VAO::bind(vao);
+            AxGL::checkError();
+            GLenum indexType;
+            if (std::is_same<IT, uint16_t>::value) {
+                indexType = GL_UNSIGNED_SHORT;
+            } else if (std::is_same<IT, uint32_t>::value) {
+                indexType = GL_UNSIGNED_INT;
+            } else {
+                Noto::error("Cannot use a VBO with a index type other than [uint16_t, uint32_t]");
+                return;
+            }
+            AxGL::checkError();
+            glDrawElements(GL_TRIANGLES,indices.numSolidifiedElements,indexType,0);
+            AxGL::checkError();
         }
-        AxGL::checkError();
-        glDrawElements(GL_TRIANGLES,indices.numSolidifiedElements,indexType,0);
-        AxGL::checkError();
     }
 
     void solidify(GLuint usage = GL_DYNAMIC_DRAW) {
