@@ -187,7 +187,7 @@ protected:
 public:
     Time lastDrawn;
 
-    ControlComponent(ControlEngine *controlEngien);
+    ControlComponent(ControlEngine *controlEngine);
 
     virtual void updateComp(Time dt) override;
 

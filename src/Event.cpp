@@ -4,6 +4,7 @@
 
 #include "Event.h"
 #include "core/Predef.h"
+#include "Noto.h"
 
 Arx::Map<long,EventType>& EventType::getEventTypesByTypeId() {
     static Arx::Map<long,EventType> * map = new Arx::Map<long,EventType>();
@@ -58,8 +59,8 @@ void EventBus::addEventPtr(EventPtr event) {
 Optional<EventPtr> EventBus::AsyncIterator::next() {
     std::lock_guard<std::mutex> guard(bus.mutex);
 
+    mostRecentIndex = std::max(0,std::min(mostRecentIndex, (int) (bus.events.size())));
     while (mostRecentIndex > 0 &&
-            bus.events.size() >= mostRecentIndex &&
            bus.events[mostRecentIndex-1]->id != mostRecentId) {
         mostRecentIndex--;
     }

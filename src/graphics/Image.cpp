@@ -15,12 +15,13 @@
 
 #include <stb/stb_image_write.h>
 
-Image::Image(unsigned char * data, int width, int height, const Optional<std::string> &loadedFrom) :
+Image::Image(unsigned char * data, int width, int height, const Optional<std::string> &loadedFrom, bool ownsData) :
         data(data),
         width(width),
         height(height),
         loadedFrom(loadedFrom),
-        components(4) {
+        components(4),
+        ownsData(ownsData) {
     assignUID();
 }
 
@@ -29,11 +30,12 @@ Image::Image(int width, int height) :
         height(height),
         components(4),
         data(new unsigned char[width * height * 4]),
-        loadedFrom(none<std::string>()) {
+        loadedFrom(none<std::string>()),
+        ownsData(true) {
     assignUID();
 }
 
-Image::Image(const std::string &loadFrom) : loadedFrom(some(loadFrom)), components(4) {
+Image::Image(const std::string &loadFrom) : loadedFrom(some(loadFrom)), components(4), ownsData(true) {
     int comp;
     stbi_set_flip_vertically_on_load(true);
     data = stbi_load(loadFrom.c_str(),&width,&height,&comp,components);
@@ -42,6 +44,29 @@ Image::Image(const std::string &loadFrom) : loadedFrom(some(loadFrom)), componen
     }
     assignUID();
 }
+
+Image::Image(const Image &img) :
+    width(img.width),
+    height(img.height),
+    components(img.components),
+    loadedFrom(img.loadedFrom),
+    ownsData(img.ownsData)
+{
+    if (ownsData) {
+        data = new unsigned char[width * height * components];
+        memcpy(data, img.data, (size_t) (width * height * components));
+    } else {
+        data = img.data;
+    }
+}
+
+
+Image::~Image() {
+    if (ownsData && data != nullptr) {
+        delete[] data;
+    }
+}
+
 
 ImagePtr Image::load(const std::string &loadFrom) {
     return std::make_shared<Image>(loadFrom);
@@ -70,12 +95,12 @@ bool Image::operator!=(const Image &rhs) const {
 }
 
 std::shared_ptr<Image> Image::sentinel() {
-    static std::shared_ptr<Image> tmp(new Image(nullptr,0,0,none<std::string>()));
+    static std::shared_ptr<Image> tmp(new Image(nullptr,0,0,none<std::string>(), false));
     return tmp;
 }
 
 void Image::copySection(const unsigned char *from, int startX, int startY, int numPixels) {
-    if (startY + numPixels >= width) {
+    if (startX + numPixels >= width) {
         Noto::error("Attempted to copy more than a single row of data into image");
     } else {
         unsigned char * ptr = data + width * startY * components + startX * components;
@@ -87,3 +112,4 @@ void Image::writeToFile(const char *path) {
     unsigned char * endRow = row(height-1);
     stbi_write_png(path,width,height,components,endRow,-width * components);
 }
+

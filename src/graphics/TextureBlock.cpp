@@ -100,18 +100,18 @@ TextureBlock::TextureBlock(int w, int h) :
 
 const TextureBlock::Cell &TextureBlock::getOrElseUpdateCell(const ImagePtr &newImage) {
     return getOrElseUpdateCell(*newImage);
-    
+
 }
 
 const TextureBlock::Cell &TextureBlock::getOrElseUpdateCell(const Image &newImage) {
     std::lock_guard<std::mutex> guard(mapLock);
-    return imageCells.getOrElseUpdate(newImage.uid, [this, newImage]() {
+    return imageCells.getOrElseUpdate(newImage.uid, [&]() {
         int targetWidth = newImage.width + border * 2;
         int targetHeight = newImage.height + border * 2;
         rbp::Rect res = binPack.Insert(targetWidth, targetHeight, rbp::MaxRectsBinPack::RectBestAreaFit);
 
         Cell newCell;
-        if (res.width == targetWidth) {
+        if (res.width != targetWidth) {
             newCell.rotated = true;
         }
         newCell.location = Rect<int>(res.x + border, res.y + border, res.width - border * 2, res.height - border * 2);
@@ -119,14 +119,32 @@ const TextureBlock::Cell &TextureBlock::getOrElseUpdateCell(const Image &newImag
                                            newCell.location.y / float(image->height),
                                            newCell.location.width / float(image->width),
                                            newCell.location.height / float(image->height));
-        newCell.texCoords[0] = newCell.texCoordRect.xy();
-        newCell.texCoords[1] = newCell.texCoordRect.xy() + glm::vec2(newCell.texCoordRect.width,0.0f);
-        newCell.texCoords[2] = newCell.texCoordRect.xy() + glm::vec2(newCell.texCoordRect.width,newCell.texCoordRect.height);
-        newCell.texCoords[3] = newCell.texCoordRect.xy() + glm::vec2(0.0f,newCell.texCoordRect.height);
+        int indexOffset = newCell.rotated ? 1 : 0;
+        newCell.texCoords[(0 + indexOffset) % 4] = newCell.texCoordRect.xy();
+        newCell.texCoords[(1 + indexOffset) % 4] = newCell.texCoordRect.xy() + glm::vec2(newCell.texCoordRect.width,0.0f);
+        newCell.texCoords[(2 + indexOffset) % 4] = newCell.texCoordRect.xy() + glm::vec2(newCell.texCoordRect.width,newCell.texCoordRect.height);
+        newCell.texCoords[(3 + indexOffset) % 4] = newCell.texCoordRect.xy() + glm::vec2(0.0f,newCell.texCoordRect.height);
 
-        for (int y = 0; y < newImage.height; ++y) {
-            image->copySection(newImage.row(y), newCell.location.x, newCell.location.y + y, newImage.width);
+        if (!newCell.rotated) {
+            for (int y = 0; y < newImage.height; ++y) {
+                image->copySection(newImage.row(y), newCell.location.x, newCell.location.y + y, newImage.width);
+                for (int x = 0; x < border; ++x) {
+                    image->pixelColor(newCell.location.x+x-border,newCell.location.y+y) = newImage.pixelColor(0,y);
+                    image->pixelColor(newCell.location.x+newCell.location.width+x,newCell.location.y+y) = newImage.pixelColor(newImage.width-1,y);
+                }
+            }
+
+            for (int x = -border; x < newCell.location.width+border; ++x) {
+                int ax = std::min(std::max(x,0),newImage.width-1);
+                for (int y = 0; y < border; ++y) {
+                    image->pixelColor(newCell.location.x + x, newCell.location.y - y - 1) = newImage.pixelColor(ax, 0);
+                    image->pixelColor(newCell.location.x + x, newCell.location.y + newCell.location.height + y) = newImage.pixelColor(ax, newImage.height-1);
+                }
+            }
+        } else {
+            Noto::error("We're not currently supporting rotation of images in texture blocks");
         }
+
         revision.fetch_add(1);
 
         return newCell;

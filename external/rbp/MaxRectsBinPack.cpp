@@ -1,5 +1,5 @@
 /** @file MaxRectsBinPack.cpp
-	@author Jukka Jylänki
+	@author Jukka Jylï¿½nki
 
 	@brief Implements different bin packer algorithms that use the MAXRECTS data structure.
 
@@ -345,22 +345,22 @@ Rect MaxRectsBinPack::FindPositionForNewNodeBestAreaFit(int width, int height,
 			}
 		}
 
-		if (freeRectangles[i].width >= height && freeRectangles[i].height >= width)
-		{
-			int leftoverHoriz = abs(freeRectangles[i].width - height);
-			int leftoverVert = abs(freeRectangles[i].height - width);
-			int shortSideFit = min(leftoverHoriz, leftoverVert);
-
-			if (areaFit < bestAreaFit || (areaFit == bestAreaFit && shortSideFit < bestShortSideFit))
-			{
-				bestNode.x = freeRectangles[i].x;
-				bestNode.y = freeRectangles[i].y;
-				bestNode.width = height;
-				bestNode.height = width;
-				bestShortSideFit = shortSideFit;
-				bestAreaFit = areaFit;
-			}
-		}
+//		if (freeRectangles[i].width >= height && freeRectangles[i].height >= width)
+//		{
+//			int leftoverHoriz = abs(freeRectangles[i].width - height);
+//			int leftoverVert = abs(freeRectangles[i].height - width);
+//			int shortSideFit = min(leftoverHoriz, leftoverVert);
+//
+//			if (areaFit < bestAreaFit || (areaFit == bestAreaFit && shortSideFit < bestShortSideFit))
+//			{
+//				bestNode.x = freeRectangles[i].x;
+//				bestNode.y = freeRectangles[i].y;
+//				bestNode.width = height;
+//				bestNode.height = width;
+//				bestShortSideFit = shortSideFit;
+//				bestAreaFit = areaFit;
+//			}
+//		}
 	}
 	return bestNode;
 }

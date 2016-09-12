@@ -85,6 +85,13 @@ namespace Arx {
             return Sequence(comb::fmap(*this, op));
         }
 
+        template<typename Op>
+        void foreach(Op op) const {
+            for (const T& t : intern) {
+                op(t);
+            }
+        }
+
         bool contains(const T& needle) const {
             for (const T& t : intern) {
                 if (t == needle) {
@@ -96,6 +103,12 @@ namespace Arx {
 
         unsigned long size() const {
             return intern.size();
+        }
+        bool isEmpty() const {
+            return size() == 0;
+        }
+        bool nonEmpty() const {
+            return ! isEmpty();
         }
 
         const_iterator begin() const { return intern.begin(); }

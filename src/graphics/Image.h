@@ -17,19 +17,21 @@ typedef std::shared_ptr<Image> ImagePtr;
 
 class Image {
 public:
-    unsigned char * data;
+    unsigned char * data = nullptr;
     int width;
     int height;
     int components;
     int uid;
     unsigned int name;
     const Optional<std::string> loadedFrom;
+    bool ownsData;
 
 
-    Image(unsigned char *data, int width, int height, const Optional<std::string> &loadedFrom);
+    Image(unsigned char *data, int width, int height, const Optional<std::string> &loadedFrom, bool ownsData);
     Image(int width, int height);
     Image(const std::string& loadFrom);
-
+    ~Image();
+    Image(const Image& img);
 
     inline const unsigned char * row(int y) const {
         return data + width * y * components;

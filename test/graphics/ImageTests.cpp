@@ -29,7 +29,7 @@ TEST_CASE("ImageWriteRead","[graphics][image]") {
     }
 
     auto path = Arx::String(getTmpDir()) + "/test_image_64_32.png";
-    img->writeToFile(path);
+    img->writeToFile(path.raw());
 
     auto img2 = Image::load(path);
 

@@ -13,28 +13,39 @@ using namespace std::chrono;
 class MetricsTimer {
 protected:
     high_resolution_clock::time_point startTime;
-    const char *name;
+	Arx::String name;
 
 public:
-    MetricsTimer(const char *name) :
+    MetricsTimer(const Arx::String& name) :
             startTime(high_resolution_clock::now()),
             name(name) {
 
     }
+
+	MetricsTimer() :
+			startTime(high_resolution_clock::now()),
+			name("Anonymous Timer") {
+
+	}
 
     virtual ~MetricsTimer() {
 
     }
 
     void printElapsed() {
-        auto delta = high_resolution_clock::now() - startTime;
-        long long nanos = duration_cast<nanoseconds>(delta).count();
+        long long nanos = nanosElapsed();
         if (nanos >= 1000000) {
             Noto::info("[{}] Elapsed: {} ms",name,nanos / 1000000);
         } else {
             Noto::info("[{}] Elapsed: {} nanos",name,nanos);
         }
     }
+
+    long long nanosElapsed() {
+		auto delta = high_resolution_clock::now() - startTime;
+		long long nanos = duration_cast<nanoseconds>(delta).count();
+		return nanos;
+	}
 };
 
 

@@ -8,7 +8,7 @@
 #include <application/ResourceManager.h>
 #include <core/Metrics.h>
 
-TEST_CASE("FontCreation","[gui][font]") {
+TEST_CASE("FontCreation","[gui][font][slow]") {
     TextureBlock tb(128,128);
 
     TIMER(FontLoadTestTime);
@@ -24,4 +24,17 @@ TEST_CASE("FontCreation","[gui][font]") {
     PRINT_TIMER(FontLoadTestTime);
 
     tb.image->writeToFile("/tmp/baked.png");
+}
+
+TEST_CASE("MSDFGeneration","[gui][font][slow]") {
+    TextureBlock tb(128,128);
+
+    TIMER(FontMSDFGenerationTime);
+
+    FontPtr font = ResourceManager::font("fonts/Goethe.ttf",&tb);
+
+    ImagePtr img = font->generateSignedDistanceFieldFor('A');
+    img->writeToFile("/tmp/msdf.png");
+
+    PRINT_TIMER(FontMSDFGenerationTime);
 }

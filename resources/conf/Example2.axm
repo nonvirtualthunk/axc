@@ -1,0 +1,8 @@
+
+
+{
+    someString = "test string"
+    someInt = 100
+    someBool = true
+    canBeOverridden = false
+}

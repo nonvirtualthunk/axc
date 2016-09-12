@@ -71,6 +71,9 @@ public:
 
     const Cell& getOrElseUpdateCell(const ImagePtr& newImage);
     const Cell& getOrElseUpdateCell(const Image& newImage);
+
+    int width() const { return image->width; }
+    int height() const { return image->height; }
 };
 
 

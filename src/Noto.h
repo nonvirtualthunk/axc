@@ -8,6 +8,10 @@
 
 #include <string>
 #include <spdlog/spdlog.h>
+#include <core/ArxString.h>
+#include <type_traits>
+#include <sstream>
+#include <core/Format.h>
 
 class Noto {
 public:
@@ -41,14 +45,21 @@ public:
         log(ERROR_LEVEL,fmt,args...);
     }
 
+
     template<typename... Args>
     static void log(int level, const char *fmt, const Args &... args) {
+        Arx::String formatted;
+        Format::internalFormat(fmt,formatted,args...);
+
         if (level == INFO_LEVEL) {
-            getConsole()->info(fmt, args...);
+//            getConsole()->info(fmt, args...);
+            getConsole()->info(formatted.raw());
         } else if (level == WARN_LEVEL) {
-            getConsole()->warn(fmt, args...);
+//            getConsole()->warn(fmt, args...);
+            getConsole()->warn(formatted.raw());
         } else if (level == ERROR_LEVEL) {
-            getConsole()->error(fmt, args...);
+//            getConsole()->error(fmt, args...);
+            getConsole()->error(formatted.raw());
         } else {
             getConsole()->error("Haven't supported log level %i yet",level);
         }

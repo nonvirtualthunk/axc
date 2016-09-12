@@ -6,6 +6,7 @@
 
 #include "core/Predef.h"
 
+#include <Optional.h>
 
 using namespace Bstrlib;
 namespace Arx {
@@ -50,10 +51,33 @@ namespace Arx {
         return ret;
     }
 
+    String String::takeRightWhile(std::function<bool(char)> predicate) const {
+        String ret;
+        for (int i = intern.length() - 1; i >= 0; --i) {
+            if (predicate(intern[i])) {
+                ret.append(intern[i]);
+            } else {
+                break;
+            }
+        }
+        return ret.reversed();
+    }
+
+    String String::reversed() const {
+        String ret;
+        for (int i = size()-1; i >= 0; --i) {
+            ret.append((*this)[i]);
+        }
+        return ret;
+    }
+
     String String::trimmed() const {
         String ret(intern);
         ret.intern.trim();
         return ret;
+    }
+    void String::trim() {
+        intern.trim();
     }
 
     void String::append(char c) {
@@ -64,10 +88,18 @@ namespace Arx {
         intern += c;
     }
 
+    void String::append(const Arx::String& str) {
+        intern += str.raw();
+    }
+
+    void String::insert(const std::string &str, int atIndex) {
+        intern.insert(atIndex, str.c_str());
+    }
+
 
     Sequence<String> String::split(char on) const {
         CBStringList l;
-        l.split(intern,on);
+        l.split(intern, (unsigned char) on);
         Sequence<String> ret;
         for (int i = 0; i < l.size(); ++i) {
             ret.add(l.at(i));
@@ -87,6 +119,10 @@ namespace Arx {
 
     bool String::operator==(const String &rhs) const {
         return intern == rhs.intern;
+    }
+
+    bool String::operator==(const char *&rhs) const {
+        return intern == rhs;
     }
 
     bool String::operator!=(const String &rhs) const {
@@ -110,6 +146,130 @@ namespace Arx {
         ret.append(other);
         return ret;
     }
+
+
+    String String::operator+(const String &other) const {
+        String ret = *this;
+        ret.append(other.raw());
+        return ret;
+    }
+
+    void String::clear() {
+        intern.trunc(0);
+    }
+
+    String String::dropWhile(std::function<bool(char)> predicate) const {
+        String ret;
+        int i = 0;
+        for (;i < size() && predicate((*this)[i]); ++i) {}
+        for (;i < size(); ++i) {
+            ret.append((*this)[i]);
+        }
+        return ret;
+    }
+
+    String String::dropRightWhile(std::function<bool(char)> predicate) const {
+        String ret;
+        int end = size()-1;
+        for (;end > 0 && predicate((*this)[end]); --end) {}
+        for (int i = 0; i <= end; ++i) {
+            ret.append((*this)[i]);
+        }
+        return ret;
+    }
+
+    String String::drop(int n) const {
+        String ret;
+        for (int i = n; i < size(); ++i) {
+            ret.append((*this)[i]);
+        }
+        return ret;
+    }
+
+    String String::dropRight(int n) const {
+        String ret;
+        for (int i = 0; i < size()-n; ++i) {
+            ret.append((*this)[i]);
+        }
+        return ret;
+    }
+
+    bool String::isEmpty() const {
+        return size() == 0;
+    }
+
+    bool String::nonEmpty() const {
+        return ! isEmpty();
+    }
+
+    const String &String::operator=(const char *s) {
+        intern = s;
+        return *this;
+    }
+
+    Optional<int> String::intValue() const {
+        try {
+            return some(std::stoi(*this));
+        } catch (const std::exception& e) {
+            return none<int>();
+        }
+    }
+
+    Optional<float> String::floatValue() const {
+        try {
+            return some(std::stof(*this));
+        } catch (const std::exception& e) {
+            return none<float>();
+        }
+    }
+
+    Optional<bool> String::boolValue() const {
+        if (intern.caselessEqual("true")) {
+            return some(true);
+        } else if (intern.caselessEqual("false")) {
+            return some(false);
+        } else {
+            return none<bool>();
+        }
+    }
+
+    Optional<double> String::doubleValue() const {
+        try {
+            return some(std::stod(*this));
+        } catch (const std::exception& e) {
+            return none<double>();
+        }
+    }
+
+    Optional<long> String::longValue() const {
+        try {
+            return some(std::stol(*this));
+        } catch (const std::exception& e) {
+            return none<long>();
+        }
+    }
+
+    String String::toLower() const {
+        String ret = *this;
+        ret.intern.tolower();
+        return ret;
+    }
+
+    String String::toUpper() const {
+        String ret = *this;
+        ret.intern.toupper();
+        return ret;
+    }
+
+    int String::find(const std::string &str) const {
+        return intern.find(str.c_str());
+    }
+
+    int String::reverseFind(const std::string &str) const {
+        return intern.reversefind(str.c_str(), (int) intern.length());
+    }
+
+
 
 
     std::ostream &operator<<(std::ostream &os, const Arx::String &string1) {

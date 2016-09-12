@@ -60,5 +60,6 @@ public:
     static bool isGood(GLuint name, GLenum kind);
 };
 
+typedef std::shared_ptr<Shader> ShaderPtr;
 
 #endif //TEST2_SHADER_H

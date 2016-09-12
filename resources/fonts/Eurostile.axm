@@ -1,0 +1,7 @@
+{
+    rangeScale : -1.15
+    pixelSize : 50
+    useMSDF : true
+    seed : 3
+    angleThreshold : 2.5
+}

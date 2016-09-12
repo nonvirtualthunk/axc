@@ -7,6 +7,7 @@
 
 #include <gui/WindowingSystem.h>
 #include <application/ResourceManager.h>
+#include <core/ArxString.h>
 
 WindowingSystemTestbed::WindowingSystemTestbed(const string &name) : Testbed(name) {
     Noto::info("Initializing windowing system testbed");
@@ -19,6 +20,7 @@ void WindowingSystemTestbed::init(GameApplication &app, GameEngine &gameEngine, 
 
     Widget * w = controlEngine.controlData(WindowingSystemData).topLevelWidget;
     w->backgroundImage = ResourceManager::image("ui/backgrounds/fancyBackground.png");
+    std::string str;
 
     Widget * child1 = new Widget(w);
     child1->_x.value = 0;

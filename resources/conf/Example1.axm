@@ -1,0 +1,18 @@
+include "Example2.axm"
+
+{
+    value = 3
+    otherValue = "hello"
+    copy = $value
+    sub {
+        underA = "a"
+        underB = "b"
+    }
+
+    colonOrEquals : true
+    arrayValues = [1,2,5]
+//    tupleValues = (1,"yes",true) // comment, possibly don't care about this
+
+    copiedFrom2 = $someString
+    canBeOverridden = true
+}

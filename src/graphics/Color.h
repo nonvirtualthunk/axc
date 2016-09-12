@@ -20,16 +20,14 @@ public:
 
     Color operator*(const glm::vec4& v);
 
-private:
-
-    inline void set(float r,float g,float b,float a) {
+    inline void setF(float r,float g,float b,float a) {
         this->r = (uint8_t) (r * 255);
         this->g = (uint8_t) (g * 255);
         this->b = (uint8_t) (b * 255);
         this->a = (uint8_t) (a * 255);
     }
     inline void set(glm::vec4 col) {
-        set(col.r,col.g,col.b,col.a);
+        setF(col.r,col.g,col.b,col.a);
     }
 };
 

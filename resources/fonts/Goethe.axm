@@ -1,0 +1,5 @@
+{
+    rangeScale: -0.7
+    pixelSize: 20
+    useMSDF : false
+}

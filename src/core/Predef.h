@@ -138,7 +138,9 @@ struct hash<forType> {                                                        \
 #define fnv(body) []() { return body; }
 #define fn(var,body) [](var) { return body; }
 #define fni(body) [](int i) { return body; }
+#define fnl(body) [](long l) { return body; }
 #define fnf(body) [](float f) { return body; }
+#define fnc(body) [](char c) { return body; }
 
 #define snew(typeName) std::make_shared<typeName>
 
@@ -170,6 +172,8 @@ constexpr constant_index< acc > counter_crumb( id, constant_index< rank >, const
 
 #define posit(expr, msg) \
 if (! (expr)) { Noto::error(msg);throw msg; }
+
+#define bcase break;case
 
 
 enum class Axis {
