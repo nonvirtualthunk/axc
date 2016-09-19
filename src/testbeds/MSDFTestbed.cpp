@@ -78,29 +78,22 @@ public:
                     q[i].texCoord = texCoords[i];
                 }
 
-                int rawHeight = glyphData.glyphBox.height;
-                int baselineHeight = font->ascent - font->descent;
-                float percentHeight = float(glyphData.glyphBox.height) / float(baselineHeight);
-                float percentWidth = float(glyphData.glyphBox.width) / float(baselineHeight);
-//                float aspectRatio = float(glyphData.glyphBox.width) / float(glyphData.glyphBox.height);
+                float percentHeight = glyphData.glyphBox.height;
+                float percentWidth = glyphData.glyphBox.width;
+
                 float w = max(scale * percentWidth, 1.0f);
                 float h = max(scale * percentHeight, 1.0f);
 
-                float descend = scale * (float(glyphData.glyphBox.y) / float(baselineHeight));
+                float descend = scale * glyphData.glyphBox.y;
 
-                float lsb = (glyphData.leftSideBearing / float(baselineHeight)) * scale;
+                float lsb = glyphData.leftSideBearing * scale;
                 float offset = 0.0f;
                 q[0].position = glm::vec3((x+lsb)+offset,(startY+descend)+offset,0.0f);
                 q[1].position = glm::vec3((x+lsb)+w+offset,(startY+descend)+offset,0.0f);
                 q[2].position = glm::vec3((x+lsb)+w+offset,(startY+descend)+h+offset,0.0f);
                 q[3].position = glm::vec3((x+lsb)+offset,(startY+descend)+h+offset,0.0f);
 
-                Noto::info("Drawing {}, w: {}, h: {}", c, w, h);
-
-
-                float advance = float(glyphData.advanceWidth) / float(baselineHeight);
-                float effAdvance = advance * scale;
-                x += effAdvance;
+                x += glyphData.advanceWidth * scale;
             }
 
             vbo.changeState(VBOs::Updating,VBOs::Updated);

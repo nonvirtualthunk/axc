@@ -23,6 +23,7 @@ namespace Arx {
         File relativeFile(const String &childPath) const;
         File withExtension(const String& extension) const;
         String fileName() const;
+        String extension() const;
 
         Sequence<File> children();
 

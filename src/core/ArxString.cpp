@@ -24,6 +24,10 @@ namespace Arx {
         return intern.find(str.c_str()) >= 0;
     }
 
+    bool String::contains(char c) const {
+        return intern.find(c) >= 0;
+    }
+
     bool String::endsWith(const std::string& str) const {
         return intern.find(str.c_str()) == this->size() - str.length();
     }
@@ -269,6 +273,30 @@ namespace Arx {
         return intern.reversefind(str.c_str(), (int) intern.length());
     }
 
+
+    int String::reverseFind(char c) const {
+        return intern.reversefind(c, (int)intern.length());
+    }
+
+    int String::find(char c) const {
+        return intern.find(c);
+    }
+
+    String String::takeAfter(int start) {
+        return takeBetween(start,size());
+    }
+
+    String String::takeBetween(int start, int end) {
+        String ret;
+        for (int i = start; i < end; ++i) {
+            ret.append((*this)[i]);
+        }
+        return ret;
+    }
+
+    String String::takeBefore(int end) {
+        return takeBetween(0,end);
+    }
 
 
 

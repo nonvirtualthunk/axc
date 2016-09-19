@@ -38,20 +38,30 @@ void Font::load() {
 }
 
 Font::GlyphData &Font::glyphFor(int codepoint) {
+    static std::mutex glyphLoadMutex;
+
+    std::lock_guard<std::mutex> guard(glyphLoadMutex);
     return glyphData.getOrElseUpdate(codepoint, [this, codepoint]() {
         GlyphData data;
-        stbtt_GetCodepointHMetrics(info, codepoint, &data.advanceWidth, &data.leftSideBearing);
+        stbtt_GetCodepointHMetrics(info, codepoint, &data.rawAdvanceWidth, &data.rawLeftSideBearing);
+		data.advanceWidth = normalizeEm(data.rawAdvanceWidth);
+		data.leftSideBearing = normalizeEm(data.rawLeftSideBearing);
         glm::ivec2 gbMax;
-        stbtt_GetCodepointBox(info, codepoint, &data.glyphBox.x,&data.glyphBox.y,&gbMax.x, &gbMax.y);
-        data.glyphBox.width = gbMax.x - data.glyphBox.x;
-        data.glyphBox.height = gbMax.y - data.glyphBox.y;
+        stbtt_GetCodepointBox(info, codepoint, &data.rawGlyphBox.x,&data.rawGlyphBox.y,&gbMax.x, &gbMax.y);
+        data.rawGlyphBox.width = gbMax.x - data.rawGlyphBox.x;
+        data.rawGlyphBox.height = gbMax.y - data.rawGlyphBox.y;
 
-        if (codepoint == int(' ')) {
+		data.glyphBox.x = normalizeEm(data.rawGlyphBox.x);
+		data.glyphBox.y = normalizeEm(data.rawGlyphBox.y);
+		data.glyphBox.width = normalizeEm(data.rawGlyphBox.width);
+		data.glyphBox.height = normalizeEm(data.rawGlyphBox.height);
+
+        if (codepoint == int(' ') || codepoint == int('\n') || codepoint == int('\t')) {
             auto blankImg = Image::ofDimensions(1,1);
             data.textureCell = textureBlock->getOrElseUpdateCell(blankImg);
         } else {
             if (!config.useMSDF) {
-                memset(renderBuffer, 0, renderBufferWidth * renderBufferHeight);
+                memset(renderBuffer, 0, (size_t) (renderBufferWidth * renderBufferHeight));
 
                 glm::ivec2 v0, v1;
                 stbtt_GetCodepointBitmapBox(info, codepoint, scale, scale, &v0.x, &v0.y, &v1.x, &v1.y);
@@ -73,33 +83,14 @@ Font::GlyphData &Font::glyphFor(int codepoint) {
                     }
                 }
 
-                Arx::String path("/tmp/baked_");
-                path.append(char(codepoint));
-                path.append(".png");
-                tmpImg.writeToFile(path.raw());
-
-                int lsb = int(data.leftSideBearing * scale);
+                int lsb = int(data.rawLeftSideBearing * scale);
                 Noto::info("Char {}, w: {}, h: {}, v0.x: {}, v0.y: {}, v1.x: {}, v1.y: {}, lsb: {}", (char)codepoint, dim.x,dim.y,v0.x,v0.y,v1.x,v1.y,lsb);
 
                 data.textureCell = textureBlock->getOrElseUpdateCell(tmpImg);
             } else {
+                Noto::info("Generating msdf for codepoint : {}", (char)codepoint);
                 auto tmpImg = renderSignedDistanceFieldFor(codepoint);
-                data.textureCell = textureBlock->getOrElseUpdateCell(tmpImg);
-                data.textureCell.location.x+=2;
-                data.textureCell.location.y+=2;
-                data.textureCell.location.width-=4;
-                data.textureCell.location.height-=4;
-
-                data.textureCell.texCoordRect = Rect<float>(data.textureCell.location.x / float(textureBlock->width()),
-                                                   data.textureCell.location.y / float(textureBlock->height()),
-                                                   data.textureCell.location.width / float(textureBlock->width()),
-                                                   data.textureCell.location.height / float(textureBlock->height()));
-
-                int indexOffset = 0;
-                data.textureCell.texCoords[(0 + indexOffset) % 4] = data.textureCell.texCoordRect.xy();
-                data.textureCell.texCoords[(1 + indexOffset) % 4] = data.textureCell.texCoordRect.xy() + glm::vec2(data.textureCell.texCoordRect.width,0.0f);
-                data.textureCell.texCoords[(2 + indexOffset) % 4] = data.textureCell.texCoordRect.xy() + glm::vec2(data.textureCell.texCoordRect.width,data.textureCell.texCoordRect.height);
-                data.textureCell.texCoords[(3 + indexOffset) % 4] = data.textureCell.texCoordRect.xy() + glm::vec2(0.0f,data.textureCell.texCoordRect.height);
+                data.textureCell = textureBlock->getOrElseUpdateCell(tmpImg, { 2 });
             }
         }
 
@@ -109,6 +100,9 @@ Font::GlyphData &Font::glyphFor(int codepoint) {
 
 FontPtr Font::fromFile(const Arx::File& file, TextureBlock *textureBlock) {
     std::vector<char> data;
+    if (!file.exists()) {
+        throw fmt("Could not read font from file, did not exist: {}",file);
+    }
     readAllBytes(file.path.raw(), data);
     char * newData = new char[data.size()];
     memcpy(newData, data.data(), data.size());
@@ -152,11 +146,6 @@ Image Font::renderSignedDistanceFieldFor(int codepoint) {
         if (vertices[i].type == STBTT_vmove) {
             cursor.x = x;
             cursor.y = y;
-//            if (contours.size() != 0) {
-//                auto& last = contours.back().edges.back();
-//                auto& first = contours.back().edges.front();
-//                contours.back().addEdge()
-//            }
             contours.push_back(msdfgen::Contour());
         } else {
             msdfgen::Point2 newPoint(x, y);
@@ -188,8 +177,7 @@ Image Font::renderSignedDistanceFieldFor(int codepoint) {
 
     int maxPixDim = std::max(w,h);
     int maxGlyphDim = std::max(dim.x,dim.y);
-    float rawScale = float(maxPixDim) / float(maxGlyphDim);
-    float scale = float(std::max(w,h)) / float(std::max(dim.x,dim.y));
+    float scale = float(maxPixDim) / float(maxGlyphDim);
     glm::ivec2 offset = -min;
     offset += int((border / float(maxPixDim)) * maxGlyphDim);
 
@@ -199,18 +187,16 @@ Image Font::renderSignedDistanceFieldFor(int codepoint) {
 
     for (int x = 0; x < w+border*2; ++x) {
         for (int y = 0; y < h+border*2; ++y) {
-//            if (x < border || x >= w-border || y < border || y >= h-border) {
-//                tmpImg.pixelColor(x,y).setF(1.0f,1.0f,1.0f,1.0f);
-//            } else {
-                auto& v = msdf(x,y);
-                tmpImg.pixelColor(x,y).setF(v.r,v.g,v.b,1.0f);
-//            }
+			auto& v = msdf(x,y);
+			tmpImg.pixelColor(x,y).setF(v.r,v.g,v.b,1.0f);
         }
     }
 
-    tmpImg.writeToFile(fmt("/tmp/msdf_{}.png",(char)codepoint).raw());
-
     return tmpImg;
+}
+
+float Font::normalizeEm(int em) {
+	return em / float(ascent - descent);
 }
 
 FontConfig::FontConfig(float rangeScale) : rangeScale(rangeScale) {}

@@ -6,6 +6,8 @@
 #define TEST2_SHAPES_H
 
 
+#include <glm/vec3.hpp>
+
 template<typename T>
 struct Rect {
     T x;
@@ -28,6 +30,33 @@ struct Rect {
     glm::tvec2<T> xy() {
         return glm::tvec2<T>(x,y);
     }
+
+    T maxX() const {
+        return x + width;
+    }
+    T maxY() const {
+        return y + height;
+    }
+    T minX() const {
+		return x;
+	}
+	T minY() const {
+		return y;
+	}
+};
+
+
+template<typename T>
+class Shape3 {
+    glm::vec3<T> center() const;
+    glm::vec3<T> min() const;
+    glm::vec3<T> max() const;
+};
+
+template<typename T>
+struct Cube {
+    glm::vec3<T> center;
+    glm::vec3<T> dimensions;
 };
 
 #endif //TEST2_SHAPES_H

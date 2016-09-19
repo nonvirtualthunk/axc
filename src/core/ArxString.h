@@ -37,6 +37,7 @@ namespace Arx {
         bool startsWith(const std::string& str) const;
         bool endsWith(const std::string& str) const;
         bool contains(const std::string& str) const;
+        bool contains(char c) const;
         String takeWhile(std::function<bool(char)> predicate) const;
         String takeRightWhile(std::function<bool(char)> predicate) const;
         String dropWhile(std::function<bool(char)> predicate) const;
@@ -47,6 +48,9 @@ namespace Arx {
         String toLower() const;
         String toUpper() const;
         String reversed() const;
+        String takeAfter(int start);
+        String takeBetween(int start, int end);
+        String takeBefore(int end);
         void trim();
         void append(char c);
         void append(const char *c);
@@ -56,7 +60,9 @@ namespace Arx {
         Sequence<String> split(char on) const;
 
         int reverseFind(const std::string& str) const;
+        int reverseFind(char c) const;
         int find(const std::string& str) const;
+        int find(char c) const;
 
         Optional<int> intValue() const;
         Optional<float> floatValue() const;

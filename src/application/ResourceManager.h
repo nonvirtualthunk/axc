@@ -18,13 +18,30 @@ namespace Arx {
     class String;
 }
 
+struct PathAndTexture {
+    std::string path;
+    TextureBlock * textureBlock;
+
+    PathAndTexture(const string &path, TextureBlock *textureBlock) : path(path), textureBlock(textureBlock) {}
+    size_t hash() const {
+        return std::hash<std::string>()(path) * 31 + reinterpret_cast<long>(textureBlock);
+    }
+
+    bool operator==(const PathAndTexture &rhs) const {
+        return path == rhs.path &&
+               textureBlock == rhs.textureBlock;
+    }
+};
+
 class ResourceManager {
 protected:
+
     static ResourceManager& inst();
 
     Arx::Map<std::string,std::shared_ptr<Shader>> shaders;
     Arx::Map<std::string,std::shared_ptr<Image>> images;
     Arx::Map<std::string,std::shared_ptr<AxmNode>> confNodes;
+    Arx::Map<PathAndTexture,std::shared_ptr<Font>> fonts;
 
 
 public:
@@ -33,7 +50,7 @@ public:
     static std::shared_ptr<Font> font(const Arx::String& path, TextureBlock * tb);
     static const AxmNode& conf(const Arx::String& path);
 
-    static Arx::String adjustedPath(const Arx::String& path);
+    static Arx::File adjustedPath(const Arx::String& path);
     static Arx::File rootResourceDirectory();
 
     static Arx::String loadTextFile(const Arx::File& file);

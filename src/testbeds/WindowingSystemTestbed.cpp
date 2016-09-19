@@ -8,6 +8,8 @@
 #include <gui/WindowingSystem.h>
 #include <application/ResourceManager.h>
 #include <core/ArxString.h>
+#include <gui/TextWidget.h>
+#include <gui/LogViewerWidget.h>
 
 WindowingSystemTestbed::WindowingSystemTestbed(const string &name) : Testbed(name) {
     Noto::info("Initializing windowing system testbed");
@@ -44,6 +46,18 @@ void WindowingSystemTestbed::init(GameApplication &app, GameEngine &gameEngine, 
     child2->_height.dimensionType = dPercentage;
     child2->_height.percentage = 0.25f;
     child2->setBackground("styledBorder_wood");
+
+    TextWidget * textChild = new TextWidget(w, "Hello world, this is a test");
+    textChild->_x.value = 50;
+    textChild->_y.value = 200;
+    textChild->_width.value = 750;
+    textChild->fontSize = 40;
+
+    LogViewerWidget * logViewer = new LogViewerWidget(w);
+    logViewer->_width.value = 1000;
+    logViewer->_height.value = 400;
+    logViewer->_x.value = 50;
+    logViewer->_y.value = 300;
 }
 
 WindowingSystemTestbed * WindowingSystemTestbed::instance = new WindowingSystemTestbed("widget");

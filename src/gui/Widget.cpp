@@ -14,7 +14,7 @@ Arx::Sequence<Widget*> Widget::ResolutionStack;
 
 const Arx::Sequence<Attribute> WidgetAttributeProfile::attributes =
         Seq<Attribute>({ Attribute(3,GL_FLOAT), Attribute(2,GL_FLOAT), Attribute(4,GL_UNSIGNED_BYTE),
-              Attribute(4,GL_UNSIGNED_SHORT,false, true) });
+              Attribute(4,GL_UNSIGNED_SHORT,false, true), Attribute(1,GL_FLOAT) });
 
 void Widget::draw(WidgetDrawContext& context) {
     static Arx::Sequence<Widget*> drawStack;
@@ -28,9 +28,11 @@ void Widget::draw(WidgetDrawContext& context) {
         ensureRelativeWidgetsDrawn(context);
 
         glm::ivec2 min = xy();
-        WidgetDrawContext::TranslationBlock xyBlock(context, min);
+        {
+            WidgetDrawContext::TranslationBlock xyBlock(context, min);
 
-        drawPre(context);
+            drawPre(context);
+        }
         drawnRevision = context.revision;
 
         int xpad = pad(Axis::X);
@@ -107,22 +109,27 @@ void Widget::drawPre(WidgetDrawContext& context) {
         Rect<float> middleTC = context.textureBlock->getOrElseUpdateCell(ResourceManager::image("blank.png")).texCoordRect;
 
         int bpw = metrics.borderPixelWidth;
-        drawQuad(context, bpw,bpw,dim.x - bpw, dim.y - bpw,backgroundColor * metrics.centerColor,middleTC,0);
+        drawQuad(context, bpw, bpw, dim.x - bpw, dim.y - bpw, backgroundColor * metrics.centerColor, middleTC, 0, false,
+                 false);
 
-        drawQuad(context, 0,0,cornerDim.x,cornerDim.y,backgroundColor,cornerTC,90);
-        drawQuad(context, dim.x - cornerDim.x,0,cornerDim.x,cornerDim.y,backgroundColor,cornerTC,180);
-        drawQuad(context, dim.x - cornerDim.x,dim.y - cornerDim.y,cornerDim.x,cornerDim.y,backgroundColor,cornerTC,270);
-        drawQuad(context, 0,dim.y - cornerDim.y,cornerDim.x,cornerDim.y,backgroundColor,cornerTC,0);
+        drawQuad(context, 0, 0, cornerDim.x, cornerDim.y, backgroundColor, cornerTC, 90, false, false);
+        drawQuad(context, dim.x - cornerDim.x, 0, cornerDim.x, cornerDim.y, backgroundColor, cornerTC, 180, false,
+                 false);
+        drawQuad(context, dim.x - cornerDim.x, dim.y - cornerDim.y, cornerDim.x, cornerDim.y, backgroundColor, cornerTC,
+                 270, false, false);
+        drawQuad(context, 0, dim.y - cornerDim.y, cornerDim.x, cornerDim.y, backgroundColor, cornerTC, 0, false, false);
 
-        drawQuad(context, 0,cornerDim.y,cornerDim.x,sideDim.y,backgroundColor,vertSideTC,0);
-        drawQuad(context, dim.x - cornerDim.x,cornerDim.y,cornerDim.x,sideDim.y,backgroundColor,vertSideTC,180);
+        drawQuad(context, 0, cornerDim.y, cornerDim.x, sideDim.y, backgroundColor, vertSideTC, 0, false, false);
+        drawQuad(context, dim.x - cornerDim.x, cornerDim.y, cornerDim.x, sideDim.y, backgroundColor, vertSideTC, 180,
+                 false, false);
 
-        drawQuad(context, cornerDim.x,0,sideDim.x,cornerDim.y,backgroundColor,horizSideTC,180);
-        drawQuad(context, cornerDim.x,dim.y - cornerDim.y,sideDim.x,cornerDim.y,backgroundColor,horizSideTC,0);
+        drawQuad(context, cornerDim.x, 0, sideDim.x, cornerDim.y, backgroundColor, horizSideTC, 180, false, false);
+        drawQuad(context, cornerDim.x, dim.y - cornerDim.y, sideDim.x, cornerDim.y, backgroundColor, horizSideTC, 0,
+                 false, false);
     } else {
         auto blankImage = ResourceManager::image("blank.png");
         const TextureBlock::Cell& textureCell = context.textureBlock->getOrElseUpdateCell(blankImage);
-        drawQuad(context, 0,0, dim.x, dim.y, backgroundColor, textureCell.texCoordRect, 0);
+        drawQuad(context, 0, 0, dim.x, dim.y, backgroundColor, textureCell.texCoordRect, 0, false, false);
     }
 }
 
@@ -131,7 +138,7 @@ void Widget::drawPost(WidgetDrawContext& context) {
 }
 
 void Widget::drawQuad(WidgetDrawContext &ctxt, float x, float y, float w, float h, const Color &color,
-                      const Rect<float> &texCoordRect, int rot) {
+                      const Rect<float> &texCoordRect, int rot, bool flipVertical, bool isGlyph) {
     WidgetAttributeProfile* vp = ctxt.vbo->addQuad();
     vp[0].position = glm::vec3(ctxt.translation.x + x,ctxt.translation.y + y,0.0f);
     vp[1].position = glm::vec3(ctxt.translation.x + x + w,ctxt.translation.y + y,0.0f);
@@ -145,11 +152,17 @@ void Widget::drawQuad(WidgetDrawContext &ctxt, float x, float y, float w, float 
     vp[(2 + tcShifts)%4].texCoord = glm::vec2(texCoordRect.x + texCoordRect.width,texCoordRect.y + texCoordRect.height);
     vp[(3 + tcShifts)%4].texCoord = glm::vec2(texCoordRect.x,texCoordRect.y + texCoordRect.height);
 
+    if (flipVertical) {
+        std::swap(vp[0].texCoord,vp[3].texCoord);
+        std::swap(vp[1].texCoord,vp[2].texCoord);
+    }
+
     const auto& b = ctxt.bounds();
     glm::tvec4<uint16_t> bv(b.x,b.y,b.x+b.width,b.y+b.height);
     for (int i = 0; i < 4; ++i) {
         vp[i].color = color;
         vp[i].bounds = bv;
+        vp[i].fontPcnt = isGlyph ? 1.0f : 0.0f;
     }
 }
 
@@ -242,4 +255,11 @@ void Widget::setBackground(const std::string &imgName) {
         name.append(".png");
     }
     backgroundImage = ResourceManager::image(Arx::String("ui/backgrounds/") + name);
+}
+
+void Widget::updateInternal() {
+    update();
+    for (Widget* child : children) {
+        child->updateInternal();
+    }
 }

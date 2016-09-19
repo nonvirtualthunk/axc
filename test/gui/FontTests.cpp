@@ -17,9 +17,9 @@ TEST_CASE("FontCreation","[gui][font][slow]") {
 
     auto& glyph = font->glyphFor('A');
 
-    REQUIRE(glyph.advanceWidth > 0);
+    REQUIRE(glyph.rawAdvanceWidth > 0);
 //    REQUIRE(glyph.leftSideBearing != 0);
-    REQUIRE(glyph.texCoords[0].x > 0.0f);
+    REQUIRE(glyph.textureCell.texCoords[0].x > 0.0f);
 
     PRINT_TIMER(FontLoadTestTime);
 

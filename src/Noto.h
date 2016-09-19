@@ -12,6 +12,14 @@
 #include <type_traits>
 #include <sstream>
 #include <core/Format.h>
+#include <deque>
+
+struct LogStatement {
+    int level;
+    Arx::String statement;
+
+    LogStatement(int level, const Arx::String &statement) : level(level), statement(statement) {}
+};
 
 class Noto {
 public:
@@ -24,6 +32,8 @@ public:
     static std::shared_ptr<spdlog::logger> getConsole();
 
     static int logLevel;
+    static int historySize;
+    static Arx::Sequence<LogStatement> history;
 
     template<typename... Args>
     static void fine(const char *fmt, const Args &... args) {
@@ -45,11 +55,13 @@ public:
         log(ERROR_LEVEL,fmt,args...);
     }
 
+    static void recordLogStatement(int level, const Arx::String& str);
 
     template<typename... Args>
     static void log(int level, const char *fmt, const Args &... args) {
         Arx::String formatted;
         Format::internalFormat(fmt,formatted,args...);
+        recordLogStatement(level,formatted);
 
         if (level == INFO_LEVEL) {
 //            getConsole()->info(fmt, args...);

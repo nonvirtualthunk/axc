@@ -32,6 +32,7 @@ Image::Image(int width, int height) :
         data(new unsigned char[width * height * 4]),
         loadedFrom(none<std::string>()),
         ownsData(true) {
+    memset(data, 0, (size_t) (width * height * 4));
     assignUID();
 }
 

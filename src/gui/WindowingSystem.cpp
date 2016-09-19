@@ -16,6 +16,7 @@ void WindowingSystem::addWidget(Widget *widget) {
 
 void WindowingSystem::update(Time dt) {
     auto topLevelWidget = getTopLevelWidget();
+    topLevelWidget->updateInternal();
 
     // if it's clean, mark it dirty
     drawContext.vbo->changeState(VBOs::Clean, VBOs::Dirty);
@@ -43,7 +44,10 @@ void WindowingSystem::draw() {
     shader->bind();
     shader->setUniform("ModelViewMatrix", mv);
     shader->setUniform("ProjectionMatrix", proj);
-    drawContext.textureBlock->bind();
+    shader->setUniform("MainTexture", 0);
+    shader->setUniform("FontTexture", 1);
+    drawContext.textureBlock->bind(0);
+    drawContext.fontTextureBlock->bind(1);
     drawContext.vbo->drawElements(GL_DYNAMIC_DRAW);
 }
 

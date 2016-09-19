@@ -52,9 +52,9 @@ void Application::loop() {
 
         double curTime = glfwGetTime();
         double delta = curTime - lastTime;
-        if (delta > (0.01666667 * 2.1)) {
-            fprintf(stderr, "update: %f\n", delta);
-        }
+//        if (delta > (0.01666667 * 2.1)) {
+//            Noto::warn("update: {}", delta);
+//        }
         lastTime = curTime;
 
         draw();

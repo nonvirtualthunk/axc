@@ -47,13 +47,16 @@ struct FontConfig {
 class Font {
 public:
     struct GlyphData {
-        int advanceWidth = 0;
-        int leftSideBearing = 0;
+        int rawAdvanceWidth = 0;
+		float advanceWidth = 0.0f;
+        int rawLeftSideBearing = 0;
+		float leftSideBearing = 0.0f;
 
         // Position/dimensions/coords in the texture block
         TextureBlock::Cell textureCell;
         // Position/dimensions in abstract glyph space
-        Rect<int> glyphBox;
+        Rect<int> rawGlyphBox;
+		Rect<float> glyphBox;
     };
 
 public:
@@ -75,6 +78,8 @@ protected:
     unsigned char * tmpImgBuffer;
 public:
     void load();
+
+	float normalizeEm(int em);
 
     Font(const unsigned char * data, TextureBlock * textureBlock, FontConfig config);
 

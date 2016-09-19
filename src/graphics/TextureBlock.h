@@ -61,6 +61,13 @@ public:
 
         Cell();
     };
+
+    struct TextureParams {
+		int internalBorder;
+
+		TextureParams(int internalBorder) : internalBorder(internalBorder) {}
+	};
+	static TextureParams DefaultTextureParams;
     int border = 1;
 public:
 
@@ -70,7 +77,7 @@ public:
     TextureBlock(int w,int h);
 
     const Cell& getOrElseUpdateCell(const ImagePtr& newImage);
-    const Cell& getOrElseUpdateCell(const Image& newImage);
+    const Cell& getOrElseUpdateCell(const Image& newImage, TextureParams params = DefaultTextureParams);
 
     int width() const { return image->width; }
     int height() const { return image->height; }

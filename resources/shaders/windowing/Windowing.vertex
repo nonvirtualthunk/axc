@@ -4,11 +4,13 @@ in vec2 Vertex;
 in vec2 TexCoord;
 in vec4 Color;
 in vec4 Bounds;
+in float FontPcnt;
 
 out vec2 VClipCoord;
 out vec4 VBounds;
 out vec2 VTexCoord;
 out vec4 VColor;
+out float VFontPcnt;
 
 uniform mat4 ProjectionMatrix;
 uniform mat4 ModelViewMatrix;
@@ -20,4 +22,5 @@ void main () {
 	VClipCoord = Vertex;
 	VTexCoord = TexCoord;
 	VBounds = Bounds;
+	VFontPcnt = FontPcnt;
 }

@@ -9,12 +9,14 @@
 #include "AxGL.h"
 #include <glad/glad.h>
 
+TextureBlock::TextureParams TextureBlock::DefaultTextureParams(0);
 
 void Texture::bind(int n) {
     if (name == 0 || committedRevision < revision) {
         commit();
     }
-    glBindTexture(GL_TEXTURE_2D, name);
+
+    Texture::bind(n, name);
 }
 
 void Texture::commit() {
@@ -100,10 +102,9 @@ TextureBlock::TextureBlock(int w, int h) :
 
 const TextureBlock::Cell &TextureBlock::getOrElseUpdateCell(const ImagePtr &newImage) {
     return getOrElseUpdateCell(*newImage);
-
 }
 
-const TextureBlock::Cell &TextureBlock::getOrElseUpdateCell(const Image &newImage) {
+const TextureBlock::Cell &TextureBlock::getOrElseUpdateCell(const Image &newImage, TextureParams params) {
     std::lock_guard<std::mutex> guard(mapLock);
     return imageCells.getOrElseUpdate(newImage.uid, [&]() {
         int targetWidth = newImage.width + border * 2;
@@ -114,7 +115,9 @@ const TextureBlock::Cell &TextureBlock::getOrElseUpdateCell(const Image &newImag
         if (res.width != targetWidth) {
             newCell.rotated = true;
         }
-        newCell.location = Rect<int>(res.x + border, res.y + border, res.width - border * 2, res.height - border * 2);
+		int ib = params.internalBorder;
+		Rect<int> rawLocation(res.x + border, res.y + border, res.width - border * 2, res.height - border * 2);
+        newCell.location = Rect<int>(rawLocation.x + ib, rawLocation.y + ib, rawLocation.width - ib * 2, rawLocation.height - ib * 2);
         newCell.texCoordRect = Rect<float>(newCell.location.x / float(image->width),
                                            newCell.location.y / float(image->height),
                                            newCell.location.width / float(image->width),
@@ -127,18 +130,18 @@ const TextureBlock::Cell &TextureBlock::getOrElseUpdateCell(const Image &newImag
 
         if (!newCell.rotated) {
             for (int y = 0; y < newImage.height; ++y) {
-                image->copySection(newImage.row(y), newCell.location.x, newCell.location.y + y, newImage.width);
+                image->copySection(newImage.row(y), rawLocation.x, rawLocation.y + y, newImage.width);
                 for (int x = 0; x < border; ++x) {
-                    image->pixelColor(newCell.location.x+x-border,newCell.location.y+y) = newImage.pixelColor(0,y);
-                    image->pixelColor(newCell.location.x+newCell.location.width+x,newCell.location.y+y) = newImage.pixelColor(newImage.width-1,y);
+                    image->pixelColor(rawLocation.x+x-border,rawLocation.y+y) = newImage.pixelColor(0,y);
+                    image->pixelColor(rawLocation.x+rawLocation.width+x,rawLocation.y+y) = newImage.pixelColor(newImage.width-1,y);
                 }
             }
 
-            for (int x = -border; x < newCell.location.width+border; ++x) {
+            for (int x = -border; x < rawLocation.width+border; ++x) {
                 int ax = std::min(std::max(x,0),newImage.width-1);
                 for (int y = 0; y < border; ++y) {
-                    image->pixelColor(newCell.location.x + x, newCell.location.y - y - 1) = newImage.pixelColor(ax, 0);
-                    image->pixelColor(newCell.location.x + x, newCell.location.y + newCell.location.height + y) = newImage.pixelColor(ax, newImage.height-1);
+                    image->pixelColor(rawLocation.x + x, rawLocation.y - y - 1) = newImage.pixelColor(ax, 0);
+                    image->pixelColor(rawLocation.x + x, rawLocation.y + rawLocation.height + y) = newImage.pixelColor(ax, newImage.height-1);
                 }
             }
         } else {

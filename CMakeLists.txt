@@ -51,9 +51,9 @@ set(SOURCE_FILES
         external/msdfgen/core/msdfgen.cpp
         external/msdfgen/core/render-sdf.cpp
         external/msdfgen/core/save-bmp.cpp
-        external/msdfgen/core/shape-description.cpp src/testbeds/MSDFTestbed.cpp src/testbeds/MSDFTestbed.h src/conf/AxmParser.cpp src/conf/AxmParser.h src/core/ArxFile.cpp src/core/ArxFile.h src/core/Parsing.h src/core/Introspection.cpp src/core/Introspection.h src/core/Format.h)
+        external/msdfgen/core/shape-description.cpp src/testbeds/MSDFTestbed.cpp src/testbeds/MSDFTestbed.h src/conf/AxmParser.cpp src/conf/AxmParser.h src/core/ArxFile.cpp src/core/ArxFile.h src/core/Parsing.h src/core/Introspection.cpp src/core/Introspection.h src/core/Format.h src/gui/LogViewerWidget.cpp src/gui/LogViewerWidget.h src/axistential/Physical.cpp src/axistential/Physical.h)
 
-set(GENERATION_SOURCE_FILES test/core/Introspectable.h src/gui/Font.h)
+set(GENERATION_SOURCE_FILES test/core/Introspectable.h src/gui/Font.h axistential/Physical.h)
 
 set(FAKE_TARGET fakeTarget)
 add_custom_target(fakeTarget /bin/bash ${CMAKE_SOURCE_DIR}/axcPreprocess.sh ${GENERATION_SOURCE_FILES})
@@ -73,7 +73,7 @@ add_dependencies(demo_lib ${FAKE_TARGET})
 
 set(TEST_SOURCE_FILES
         test/testMain.cpp
-        test/UnitOfMeasureTests.cpp test/CombinatorTests.cpp test/EventTests.cpp test/OptionalTests.cpp test/PredefTests.cpp test/EnumTests.cpp test/ArxMapTests.cpp test/AuxDataTests.cpp test/engine/GameEngineTests.cpp test/containers/TaleaTests.cpp test/graphics/VBOTests.cpp test/graphics/ImageTests.cpp test/graphics/ShaderTests.cpp test/graphics/TextureBlockTests.cpp test/gui/FontTests.cpp test/core/ModdableTests.cpp test/conf/AxmParserTest.cpp test/core/IntrospectionTests.cpp test/core/Introspectable.h test/core/Introspectable.cpp)
+        test/UnitOfMeasureTests.cpp test/CombinatorTests.cpp test/EventTests.cpp test/OptionalTests.cpp test/PredefTests.cpp test/EnumTests.cpp test/ArxMapTests.cpp test/AuxDataTests.cpp test/engine/GameEngineTests.cpp test/containers/TaleaTests.cpp test/graphics/VBOTests.cpp test/graphics/ImageTests.cpp test/graphics/ShaderTests.cpp test/graphics/TextureBlockTests.cpp test/gui/FontTests.cpp test/core/ModdableTests.cpp test/conf/AxmParserTest.cpp test/core/IntrospectionTests.cpp test/core/Introspectable.h test/core/Introspectable.cpp test/gui/TextRenderingTest.cpp)
 add_executable(testing ${TEST_SOURCE_FILES} ${GLAD})
 target_link_libraries(testing demo_lib)
 target_link_libraries(testing glfw)

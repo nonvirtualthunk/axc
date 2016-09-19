@@ -71,6 +71,7 @@ struct WidgetAttributeProfile {
     glm::vec2 texCoord;
     Color color;
     glm::tvec4<uint16_t> bounds;
+    float fontPcnt;
 
     static const Arx::Sequence<Attribute> attributes;
 };
@@ -91,6 +92,7 @@ struct WidgetDrawContext {
     glm::ivec2 translation;
     std::vector<Rect<int>> boundsStack;
     TextureBlock* textureBlock = new TextureBlock(1024,1024);
+	TextureBlock* fontTextureBlock = new TextureBlock(2048,2048);
     VBO<WidgetAttributeProfile>* vbo = new VBO<WidgetAttributeProfile>();
 
     WidgetDrawContext(int revision) : revision(revision) {
@@ -155,17 +157,20 @@ public:
 public:
     Widget(Widget *parent);
 
-    void draw(WidgetDrawContext& context);
+	virtual void draw(WidgetDrawContext& context);
 
+    virtual void updateInternal();
 protected:
     void ensureRelativeWidgetsDrawn(WidgetDrawContext& context);
 
+    virtual void update(){}
 
     virtual void drawPre(WidgetDrawContext& context);
     virtual void drawPost(WidgetDrawContext& context);
 
 
-    void drawQuad(WidgetDrawContext& context, float x, float y, float w, float h, const Color& color, const Rect<float>& texCoordRect, int rot);
+    void drawQuad(WidgetDrawContext &context, float x, float y, float w, float h, const Color &color,
+                      const Rect<float> &texCoordRect, int rot, bool flipVertical, bool isGlyph);
 
 public:
     const WidgetDimension& dimension(Axis axis) const {

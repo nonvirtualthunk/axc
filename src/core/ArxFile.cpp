@@ -62,7 +62,12 @@ namespace Arx {
             Noto::error("Cannot change extension to {} on file with path {}", extension, path);
             return *this;
         } else {
-            return Arx::File(path.dropRightWhile(fnc(c != '.')).dropRight(1) + extension);
+            String existingExtension = this->extension();
+            if (existingExtension.isEmpty()) {
+                return Arx::File(path + extension);
+            } else {
+                return Arx::File(path.dropRightWhile(fnc(c != '.')).dropRight(1) + extension);
+            }
         }
     }
 
@@ -106,4 +111,14 @@ namespace Arx {
             throw "Could not read non existent file";
         }
     }
+
+	String File::extension() const {
+		String fname = fileName();
+		int dotIndex = fname.reverseFind('.');
+        if (dotIndex >= 0) {
+			return fname.takeAfter(dotIndex);
+		} else {
+			return "";
+		}
+	}
 }

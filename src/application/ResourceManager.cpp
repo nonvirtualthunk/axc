@@ -43,9 +43,9 @@ std::shared_ptr<Shader> ResourceManager::shader(const Arx::String &path) {
         auto ret = std::make_shared<Shader>();
 
         auto vpath = ResourceManager::adjustedPath(path + ".vertex");
-        Arx::String vsrc = readAll(vpath.raw());
+        Arx::String vsrc = readAll(vpath.path.raw());
         auto fpath = ResourceManager::adjustedPath(path + ".fragment");
-        Arx::String fsrc = readAll(fpath.raw());
+        Arx::String fsrc = readAll(fpath.path.raw());
 
         ret->load(vsrc.raw(),fsrc.raw());
         return ret;
@@ -53,19 +53,28 @@ std::shared_ptr<Shader> ResourceManager::shader(const Arx::String &path) {
 }
 
 std::shared_ptr<Image> ResourceManager::image(const Arx::String &path) {
-    return inst().images.getOrElseUpdate(path,[&](){
-        return Image::load(ResourceManager::adjustedPath(path));
+    File apath = ResourceManager::adjustedPath(path);
+    return inst().images.getOrElseUpdate(apath.path,[&](){
+        return Image::load(apath.path);
     });
 }
 
-Arx::String ResourceManager::adjustedPath(const Arx::String &path) {
-    return rootResourceDirectory().relativeFile(path).path;
+Arx::File ResourceManager::adjustedPath(const Arx::String &path) {
+    return rootResourceDirectory().relativeFile(path);
 }
 
 std::shared_ptr<Font> ResourceManager::font(const Arx::String &path, TextureBlock * tb) {
+    Arx::File tmp(path);
+    Arx::String extensionedPath = tmp.withExtension(".ttf").path;
+
     auto apath = adjustedPath(path);
-    Arx::File file(apath);
-    return Font::fromFile(file,tb);
+    if (!apath.exists()) {
+        apath = adjustedPath(fmt("fonts/{}",extensionedPath));
+    }
+
+    PathAndTexture ident(apath.path,tb);
+    return ResourceManager::inst().fonts.getOrElseUpdate(ident,[&](){ return Font::fromFile(apath,tb); });
+
 }
 
 Arx::String ResourceManager::loadTextFile(const Arx::File &file) {
@@ -78,10 +87,10 @@ const AxmNode& ResourceManager::conf(const Arx::String &path) {
     ParsingContext ctxt;
     auto apath = adjustedPath(path);
     ctxt.rootDirectory = rootResourceDirectory(); // the base directory for resources in general
-    ctxt.referenceDirectory = Arx::File(apath).parent(); // the directory containing the target file
-            auto node = parser.parse(ctxt, readAll(apath.raw()));
+    ctxt.referenceDirectory = apath.parent(); // the directory containing the target file
+    auto node = parser.parse(ctxt, readAll(apath.path.raw()));
 
-    inst().confNodes.put(apath, node);
+    inst().confNodes.put(apath.path, node);
     return *node;
 }
 

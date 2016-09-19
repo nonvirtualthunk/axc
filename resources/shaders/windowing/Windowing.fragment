@@ -1,20 +1,38 @@
 #version 150 core
 
-uniform sampler2D mainTexture;
-uniform sampler2D fontTexture;
+uniform sampler2D MainTexture;
+uniform sampler2D FontTexture;
 
 in vec2 VClipCoord;
 in vec4 VBounds;
 in vec2 VTexCoord;
 in vec4 VColor;
+in float VFontPcnt;
 
 out vec4 o_FragColor;
+
+float median(float r, float g, float b) {
+    return max(min(r, g), min(max(r, g), b));
+}
 
 void main (){
 //    if ( (VClipCoord.x < VBounds.x || VClipCoord.y < VBounds.y || VClipCoord.x > VBounds.z || VClipCoord.y > VBounds.w) ){
 //       discard;
 //    } else {
-      o_FragColor = VColor * texture(mainTexture,VTexCoord);
+      vec4 mainColor = texture(MainTexture,VTexCoord);
+
+      vec3 fontRaw = texture(FontTexture,VTexCoord).rgb;
+      float sigDist = median(fontRaw.r, fontRaw.g, fontRaw.b) - 0.5;
+      float opacity = clamp(sigDist/fwidth(sigDist) + 0.5, 0.0, 1.0);
+
+      o_FragColor = VColor * mix(mainColor, vec4(1,1,1,1.0f - opacity), VFontPcnt);
+//    o_FragColor = VColor * vec4(1,1,1,1.0f - opacity);
+//        o_FragColor = VColor * mainColor;
+
+
+
+
+//      o_FragColor = VColor * vec4(1.0f -opacity);
 //      o_FragColor.a = max(o_FragColor.a,0.1);
 //        o_FragColor = vec4(1,0,0,1);
 //    }
