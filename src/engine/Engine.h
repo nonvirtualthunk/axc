@@ -10,8 +10,8 @@
 #include <thread>
 #include <Event.h>
 #include <Noto.h>
+#include "World.h"
 
-class World;
 class WindowingSystem;
 
 template<typename ComponentType>
@@ -29,7 +29,7 @@ public:
     template<typename C>
     C* addComponent() {
         typedef typename C::engine_type castTo;
-        C *comp = new C((castTo*)this);
+        C *comp = new C(*(castTo*)this);
         components.push_back(comp);
         comp->init();
         return comp;
@@ -53,12 +53,12 @@ public:
 
             threads.push_back(std::thread([=](){
                 for (ComponentType* comp : lockedComps) {
-                    comp->lastUpdated = Nanoseconds(epochNanosSteady());
+                    comp->lastUpdated = Nanoseconds(elapsedNanos());
                 }
                 while (!endSignal) {
                     auto started = std::chrono::high_resolution_clock::now();
                     for (ComponentType* comp : lockedComps) {
-                        auto cur = Nanoseconds(epochNanosSteady());
+                        auto cur = Nanoseconds(elapsedNanos());
                         auto dt = cur - comp->lastUpdated;
                         if (dt > comp->updateInterval()) {
                             comp->updateRaw(dt);
@@ -112,20 +112,24 @@ class GameComponent;
 class GameEngine : public Engine<GameComponent> {
 
 public:
-    World * world;
+    World& world;
 
-    GameEngine();
+    GameEngine(World& world);
 
+    template<typename T>
+    typename T::associated_type &aux(T adt) {
+        return world.aux(adt);
+    }
 };
 
 class GameComponent : public EngineComponent<GameEngine> {
 protected:
-    GameEngine *gameEngine;
-    World * world;
+    GameEngine& gameEngine;
+    World& world;
     EventBus::Watcher gameBus;
 
 public:
-    GameComponent(GameEngine *gameEngine);
+    GameComponent(GameEngine& gameEngine);
 
     virtual void updateComp(Time dt) override;
 };
@@ -135,24 +139,24 @@ class GraphicsComponent;
 
 class GraphicsEngine : public Engine<GraphicsComponent> {
 public:
-    GameEngine* gameEngine;
+    GameEngine& gameEngine;
 
-    GraphicsEngine(GameEngine *gameEngine);
+    GraphicsEngine(GameEngine &gameEngine);
 
     void draw();
 };
 
 class GraphicsComponent : public EngineComponent<GraphicsEngine> {
 protected:
-    GraphicsEngine* graphicsEngine;
-    World* world;
+    GraphicsEngine& graphicsEngine;
+    World& world;
     EventBus::Watcher gameBus;
     EventBus::Watcher graphicsBus;
 
 public:
     Time lastDrawn;
 
-    GraphicsComponent(GraphicsEngine *graphicsEngine);
+    GraphicsComponent(GraphicsEngine &graphicsEngine);
 
     virtual void draw() = 0;
 
@@ -166,20 +170,19 @@ class ControlComponent;
 
 class ControlEngine : public Engine<ControlComponent> {
 public:
-    GameEngine* gameEngine;
-    GraphicsEngine* graphicsEngine;
-    WindowingSystem* windowingSystem;
+    GameEngine& gameEngine;
+    GraphicsEngine& graphicsEngine;
     AuxDataContainer<ControlAuxData<void>> controlData;
 
-    ControlEngine(GameEngine *gameEngine, GraphicsEngine *graphicsEngine);
+    ControlEngine(GameEngine &gameEngine, GraphicsEngine &graphicsEngine);
 
     void draw();
 };
 
 class ControlComponent : public EngineComponent<ControlEngine> {
 protected:
-    ControlEngine* controlEngine;
-    World* world;
+    ControlEngine& controlEngine;
+    World& world;
     EventBus::Watcher gameBus;
     EventBus::Watcher graphicsBus;
     EventBus::Watcher controlBus;
@@ -187,7 +190,7 @@ protected:
 public:
     Time lastDrawn;
 
-    ControlComponent(ControlEngine *controlEngine);
+    ControlComponent(ControlEngine &controlEngine);
 
     virtual void updateComp(Time dt) override;
 
@@ -197,7 +200,7 @@ public:
 
     template<typename T>
     typename T::associated_type &aux(T adt) {
-        return controlEngine->controlData.aux(adt);
+        return controlEngine.controlData.aux(adt);
     }
 };
 

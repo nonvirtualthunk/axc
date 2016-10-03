@@ -121,8 +121,9 @@ pow2roundup (int x)
     return x+1;
 }
 
-long long int epochMillisSteady();
-long long int epochNanosSteady();
+double elapsedSeconds();
+long long int elapsedMillis();
+long long int elapsedNanos();
 long long int epochMillisSystem();
 
 #define DECLARE_METHOD_HASH(forType) \

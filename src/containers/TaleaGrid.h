@@ -12,8 +12,10 @@
 
 template<typename T, bool onlyTrackDelta, int CS>
 class TaleaGrid {
-protected:
+public:
     typedef Talea<T, onlyTrackDelta> TaleaType;
+
+protected:
     typedef TaleaType* TaleaPtr;
     typedef Arx::Map<VoxelCoord,TaleaType*> TaleaMap;
 
@@ -31,6 +33,7 @@ protected:
     TaleaType* sentinelTalea = new TaleaType(sentinel,VoxelCoord(-10000,-10000,-10000));
     TaleaMap nonCoreTaleae;
     std::unordered_set<uint16_t> nonSentinelIndices;
+    int trackingEnabled = 0;
 
     std::atomic<TaleaType*> coreTaleae[CoreDim * CoreDim];
 public:
@@ -70,6 +73,11 @@ public:
         }
     }
 
+    template<typename V>
+    TaleaType& getTaleaRW(const V& v) {
+        return getTaleaRW(v.x,v.y,v.z);
+    }
+
     TaleaType& getTaleaRW(int x, int y, int z) {
         int ax = x + ToPositive;
         int ay = y + ToPositive;
@@ -90,6 +98,7 @@ public:
             if (rawTal == nullptr) {
                 nonSentinelIndices.emplace((uint16_t)index);
                 TaleaType * newTal = new TaleaType(sentinel, VoxelCoord((glm::ivec3(sx,sy,sz) * (1 << TaleaDimPo2))));
+                newTal->trackingEnabled = this->trackingEnabled > 0;
                 if (!at_tal.compare_exchange_strong(rawTal, newTal)) {
                     delete newTal;
                     return *at_tal.load();
@@ -107,7 +116,8 @@ public:
         }
     }
 
-    inline const T& operator()(const VoxelCoord& v) const {
+    template<typename V>
+    inline const T& operator()(const V& v) const {
         return operator()(v.x,v.y,v.z);
     }
     inline const T& operator()(int x, int y, int z) const {
@@ -132,6 +142,30 @@ public:
 
         tal.set(rx,ry,rz, v);
     }
+
+    void enableTracking() {
+        trackingEnabled++;
+        if (trackingEnabled == 1) { // switched from disabled to enabled
+            switchTrackingTo(true);
+        }
+    }
+    void disableTracking() {
+        trackingEnabled--;
+        if (trackingEnabled == 0) { // switched from enabled to disabled
+            switchTrackingTo(false);
+        }
+    }
+
+protected :
+    void switchTrackingTo(bool switchedTo) {
+        for (int i = 0; i < CoreDim * CoreDim; ++i) {
+            if (coreTaleae[i] != nullptr) {
+                coreTaleae[i].load()->trackingEnabled = switchedTo;
+            }
+        }
+        this->nonCoreTaleae.foreach([switchedTo](VoxelCoord k,TaleaType* v) { v->trackingEnabled = switchedTo; });
+    }
+public:
 
 
     class Iterator {
@@ -180,6 +214,15 @@ public:
 
     Iterator iter() const {
         return Iterator(*this);
+    }
+
+
+
+    void foreach (std::function<void(TaleaType*)> func) {
+        Iterator i = iter();
+        while (i.hasNext()) {
+            func(i.next());
+        }
     }
 
 };

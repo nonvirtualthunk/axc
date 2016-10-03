@@ -7,6 +7,7 @@
 #include "WindowingSystem.h"
 #include <graphics/Shader.h>
 #include <application/Application.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 void WindowingSystem::addWidget(Widget *widget) {
     auto topLevelWidget = getTopLevelWidget();
@@ -51,7 +52,7 @@ void WindowingSystem::draw() {
     drawContext.vbo->drawElements(GL_DYNAMIC_DRAW);
 }
 
-WindowingSystem::WindowingSystem(ControlEngine *controlEngine) :
+WindowingSystem::WindowingSystem(ControlEngine &controlEngine) :
         ControlComponent(controlEngine),
         drawContext(1) {
 

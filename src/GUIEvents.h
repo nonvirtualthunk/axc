@@ -12,9 +12,9 @@ class KeyModifiers {
 public:
     int modifierSet;
 
-    bool ctrl();
-    bool shift();
-    bool alt();
+    bool ctrl() const;
+    bool shift() const;
+    bool alt() const;
 
     KeyModifiers(int modifierSet) : modifierSet(modifierSet) {}
 };

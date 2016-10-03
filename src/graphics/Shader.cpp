@@ -8,6 +8,9 @@
 #include <core/ArxString.h>
 #include <Noto.h>
 #include "Shader.h"
+#include <glm/ext.hpp>
+#include <glad/glad.h>
+#include <Optional.h>
 
 #include "core/Predef.h"
 #include "AxGL.h"
@@ -65,13 +68,14 @@ void Shader::bind() {
         }
     }
 
-    Shader::bind(name);
+    Shader::bind(name, this);
 }
 
-void Shader::bind(GLuint name) {
+void Shader::bind(GLuint name, Shader * shaderObject) {
     if (AxGL::activeShader != name) {
         glUseProgram(name);
         AxGL::activeShader = name;
+        AxGL::activeShaderObject = Optional<Shader*>::some(shaderObject);
     }
 }
 
@@ -127,3 +131,21 @@ bool Shader::isGood(GLuint name, GLenum kind) {
 }
 
 Shader::Shader() : vertexShader(GL_VERTEX_SHADER), fragmentShader(GL_FRAGMENT_SHADER) {}
+
+GLint Shader::uniformLocation(const std::string &uniformName) {
+    return uniformLocations.getOrElseUpdate(uniformName,[&](){
+        return glGetUniformLocation(name, uniformName.c_str());
+    });
+}
+
+bool Shader::hasUniform(const std::string &uniformName) {
+    return uniformLocations.contains(uniformName);
+}
+
+void Shader::setUniform(const std::string &uniformName, const int &newValue) {
+    glUniform1i(uniformLocation(uniformName),newValue);
+}
+
+void Shader::setUniform(const std::string &uniformName, const glm::mat4x4 &newValue) {
+    glUniformMatrix4fv(uniformLocation(uniformName),1,GL_FALSE,glm::value_ptr(newValue));
+}

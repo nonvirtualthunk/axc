@@ -9,13 +9,15 @@
 #include <graphics/Shader.h>
 #include <application/ResourceManager.h>
 #include <graphics/TextureBlock.h>
+#include <GLFW/glfw3.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "core/Predef.h"
 
 
 class SimpleGameComponent : public GameComponent {
 public:
-    SimpleGameComponent(GameEngine *gameEngine) : GameComponent(gameEngine) {}
+    SimpleGameComponent(GameEngine &gameEngine) : GameComponent(gameEngine) {}
 
     Time accumulated = Seconds(0);
     virtual void update(Time dt) override {
@@ -36,7 +38,7 @@ public:
     glm::mat4x4 modelview;
     glm::mat4x4 projection;
 
-    SimpleGraphicsComponent(GraphicsEngine *graphicsEngine) : GraphicsComponent(graphicsEngine) {}
+    SimpleGraphicsComponent(GraphicsEngine &graphicsEngine) : GraphicsComponent(graphicsEngine) {}
 
     virtual void init() override {
         auto va = vbo.addQuad();
@@ -72,6 +74,8 @@ public:
     virtual void draw() override {
 //        float effTheta = theta + deltaSinceLastUpdate().in(Seconds);
         float effTheta = theta;
+//        float effTheta = epochNanosSteady() * 1000000.0f;
+//        float effTheta = glfwGetTime();
         AxGL::checkError();
         modelview = glm::lookAt(
                 glm::vec3(0.0f,0.0f,-10.0f),

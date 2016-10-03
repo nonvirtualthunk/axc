@@ -18,6 +18,12 @@ public:
     size_t hash() const {
         return (size_t) ((x * 73856093L) xor (y * 19349663L) xor (z * 83492791L));
     }
+
+
 };
+
+class AxmNode;
+void operator>>(const AxmNode& node, glm::ivec3& v);
+
 
 #endif //TEST2_VOXELCOORD_H

@@ -61,7 +61,7 @@ void Application::loop() {
 
         glfwSwapBuffers(window);
         glfwPollEvents();
-        lastSwap = Milliseconds(epochMillisSteady());
+        lastSwap = Milliseconds(elapsedMillis());
     }
 }
 

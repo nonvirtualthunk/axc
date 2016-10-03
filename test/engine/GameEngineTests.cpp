@@ -20,7 +20,7 @@ public:
     int testValue = 1;
     int updateCount = 0;
 
-    TestComponent(GameEngine *gameEngine) : GameComponent(gameEngine) {
+    TestComponent(GameEngine &gameEngine) : GameComponent(gameEngine) {
 
     }
 
@@ -40,7 +40,8 @@ public:
 };
 
 TEST_CASE("Game engine threading","[engine][concurrency]") {
-    GameEngine engine;
+    World world;
+    GameEngine engine(world);
 
     auto comp = engine.addComponent<TestComponent>();
 
@@ -62,7 +63,8 @@ TEST_CASE("Game engine threading","[engine][concurrency]") {
 }
 
 TEST_CASE("gameEngineEventBus","[engine][event]") {
-    GameEngine engine;
+    World world;
+    GameEngine engine(world);
 
     auto comp = engine.addComponent<TestComponent>();
 

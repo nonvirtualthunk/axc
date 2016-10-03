@@ -8,12 +8,12 @@
 #include "core/Predef.h"
 #include "World.h"
 
-GraphicsComponent::GraphicsComponent(GraphicsEngine *graphicsEngine) :
+GraphicsComponent::GraphicsComponent(GraphicsEngine &graphicsEngine) :
         graphicsEngine(graphicsEngine),
-        world(graphicsEngine->gameEngine->world),
-        gameBus(graphicsEngine->gameEngine->eventBus.watcher()),
-        graphicsBus(graphicsEngine->eventBus.watcher()),
-        lastDrawn(Milliseconds(epochMillisSteady()))
+        world(graphicsEngine.gameEngine.world),
+        gameBus(graphicsEngine.gameEngine.eventBus.watcher()),
+        graphicsBus(graphicsEngine.eventBus.watcher()),
+        lastDrawn(Milliseconds(elapsedMillis()))
 {}
 
 void GraphicsComponent::updateComp(Time dt) {
@@ -30,19 +30,19 @@ Time ControlComponent::nextExpectedSwap() const {
     return Application::inst->nextExpectedSwap();
 }
 
-GraphicsEngine::GraphicsEngine(GameEngine *gameEngine) : gameEngine(gameEngine) {}
+GraphicsEngine::GraphicsEngine(GameEngine &gameEngine) : gameEngine(gameEngine) {}
 
 void GraphicsEngine::draw() {
     for (GraphicsComponent* comp : components) {
         comp->draw();
-        comp->lastDrawn = Milliseconds(epochMillisSteady());
+        comp->lastDrawn = Milliseconds(elapsedMillis());
     }
 }
 
-GameComponent::GameComponent(GameEngine *gameEngine) :
+GameComponent::GameComponent(GameEngine& gameEngine) :
         gameEngine(gameEngine),
-        world(gameEngine->world),
-        gameBus(gameEngine->eventBus.watcher()) {
+        world(gameEngine.world),
+        gameBus(gameEngine.eventBus.watcher()) {
 
 }
 
@@ -52,13 +52,13 @@ void GameComponent::updateComp(Time dt) {
     update(dt);
 }
 
-ControlComponent::ControlComponent(ControlEngine *controlEngine) :
+ControlComponent::ControlComponent(ControlEngine &controlEngine) :
         controlEngine(controlEngine),
-        world(controlEngine->graphicsEngine->gameEngine->world),
-        controlBus(controlEngine->eventBus.watcher()),
-        gameBus(controlEngine->gameEngine->eventBus.watcher()),
-        graphicsBus(controlEngine->graphicsEngine->eventBus.watcher()),
-        lastDrawn(Milliseconds(epochMillisSteady()))
+        world(controlEngine.graphicsEngine.gameEngine.world),
+        controlBus(controlEngine.eventBus.watcher()),
+        gameBus(controlEngine.gameEngine.eventBus.watcher()),
+        graphicsBus(controlEngine.graphicsEngine.eventBus.watcher()),
+        lastDrawn(Milliseconds(elapsedMillis()))
 {}
 
 void ControlComponent::updateComp(Time dt) {
@@ -69,7 +69,7 @@ void ControlComponent::updateComp(Time dt) {
     update(dt);
 }
 
-ControlEngine::ControlEngine(GameEngine *gameEngine, GraphicsEngine *graphicsEngine) :
+ControlEngine::ControlEngine(GameEngine &gameEngine, GraphicsEngine &graphicsEngine) :
         gameEngine(gameEngine),
         graphicsEngine(graphicsEngine)
 {
@@ -79,8 +79,8 @@ ControlEngine::ControlEngine(GameEngine *gameEngine, GraphicsEngine *graphicsEng
 void ControlEngine::draw() {
     for (ControlComponent * comp : components) {
         comp->draw();
-        comp->lastDrawn = Milliseconds(epochMillisSteady());
+        comp->lastDrawn = Milliseconds(elapsedMillis());
     }
 }
 
-GameEngine::GameEngine() : world(new World()) {}
+GameEngine::GameEngine(World& world) : world(world) {}

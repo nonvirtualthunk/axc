@@ -17,6 +17,7 @@ bool AxGL::vertexAttribEnabled[20] = {false,false,false,false,false,false,false,
                                       false,false,false,false,false,false,false,false,false,false};
 int AxGL::activeTextureSlot = 0;
 GLuint AxGL::activeShader = 0;
+Optional<Shader *> AxGL::activeShaderObject = Optional<Shader*>::none();
 AxGL::Viewport AxGL::activeViewport;
 
 void AxGL::checkError() {

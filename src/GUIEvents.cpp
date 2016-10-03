@@ -13,21 +13,17 @@ glm::vec2 MouseMirror::mousePosition = glm::vec2(0.0f,0.0f);
 bool MouseMirror::leftDown = false;
 bool MouseMirror::rightDown = false;
 
-bool KeyModifiers::ctrl() {
-    return isBitSet(modifierSet, GLFW_KEY_LEFT_CONTROL) ||
-           isBitSet(modifierSet, GLFW_KEY_RIGHT_CONTROL) ||
-           isBitSet(modifierSet, GLFW_KEY_LEFT_SUPER) ||
-           isBitSet(modifierSet, GLFW_KEY_RIGHT_SUPER);
+bool KeyModifiers::ctrl() const {
+    return isBitSet(modifierSet, GLFW_MOD_CONTROL) ||
+           isBitSet(modifierSet, GLFW_MOD_SUPER);
 }
 
-bool KeyModifiers::shift() {
-    return isBitSet(modifierSet, GLFW_KEY_LEFT_SHIFT) ||
-           isBitSet(modifierSet, GLFW_KEY_RIGHT_SHIFT);
+bool KeyModifiers::shift() const {
+    return isBitSet(modifierSet, GLFW_MOD_SHIFT);
 }
 
-bool KeyModifiers::alt() {
-    return isBitSet(modifierSet, GLFW_KEY_LEFT_ALT) ||
-           isBitSet(modifierSet, GLFW_KEY_RIGHT_ALT);
+bool KeyModifiers::alt() const {
+    return isBitSet(modifierSet, GLFW_MOD_ALT);
 }
 
 MouseMoveEvent::MouseMoveEvent(const bool isMove,

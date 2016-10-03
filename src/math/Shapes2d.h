@@ -27,8 +27,8 @@ struct Rect {
         return Rect<T>(lx,ly,hx,hy);
     }
 
-    glm::tvec2<T> xy() {
-        return glm::tvec2<T>(x,y);
+    glm::tvec2<T,glm::precision::defaultp> xy() {
+        return glm::tvec2<T,glm::precision::defaultp>(x,y);
     }
 
     T maxX() const {
@@ -46,17 +46,6 @@ struct Rect {
 };
 
 
-template<typename T>
-class Shape3 {
-    glm::vec3<T> center() const;
-    glm::vec3<T> min() const;
-    glm::vec3<T> max() const;
-};
 
-template<typename T>
-struct Cube {
-    glm::vec3<T> center;
-    glm::vec3<T> dimensions;
-};
 
 #endif //TEST2_SHAPES_H

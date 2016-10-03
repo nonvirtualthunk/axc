@@ -23,7 +23,7 @@ add_subdirectory(external/glfw)
 include_directories(external/glfw/include ${Boost_INCLUDE_DIRS})
 
 set(GLAD "external/glad/glad.h"
-        "external/glad/glad.c")
+        "external/glad/glad.c" src/axistential/testbeds/LightingTestbed.cpp)
 
 include_directories("external")
 include_directories("src")
@@ -37,7 +37,7 @@ set(BSTRLIB_FILES external/bstrlib/bstraux.c external/bstrlib/bstrlib.c external
 set(SOURCE_FILES
         ${BSTRLIB_FILES}
         src/UnitOfMeasure.cpp src/containers/Seq.h src/application/Application.cpp src/application/Application.h src/Combinators.h src/Event.cpp src/Event.h src/ArxEnum.cpp src/ArxEnum.h src/Optional.h src/core/Predef.h src/containers/ArxMap.h src/Noto.cpp src/Noto.h src/core/Predef.cpp src/GUIEvents.cpp src/GUIEvents.h src/engine/Engine.cpp src/engine/Engine.h src/core/Reflect.h src/core/AuxData.h src/engine/World.cpp src/engine/World.h src/application/GameApplication.cpp src/application/GameApplication.h src/containers/Talea.h src/containers/TaleaGrid.h src/core/VoxelCoord.h src/graphics/VBO.h src/graphics/AxGL.h src/graphics/AxGL.cpp src/graphics/VAO.h src/graphics/VAO.cpp src/containers/ArxSet.h src/containers/DelegatingHasher.h src/graphics/Image.cpp src/graphics/Image.cpp src/graphics/Image.h
-        external/rbp/MaxRectsBinPack.cpp external/rbp/Rect.cpp src/graphics/TextureBlock.cpp src/graphics/TextureBlock.h src/math/Shapes.h src/testbeds/Testbed.h src/graphics/StandardAttributeProfiles.h src/graphics/StandardAttributeProfiles.cpp src/graphics/Shader.cpp src/graphics/Shader.h src/core/ArxString.cpp src/core/ArxString.h src/application/ResourceManager.cpp src/application/ResourceManager.h src/gui/Widget.cpp src/gui/Widget.h src/gui/BackgroundImageMetrics.h src/graphics/Color.h src/gui/WindowingSystem.cpp src/gui/WindowingSystem.h
+        external/rbp/MaxRectsBinPack.cpp external/rbp/Rect.cpp src/graphics/TextureBlock.cpp src/graphics/TextureBlock.h src/math/Shapes2d.h src/testbeds/Testbed.h src/graphics/StandardAttributeProfiles.h src/graphics/StandardAttributeProfiles.cpp src/graphics/Shader.cpp src/graphics/Shader.h src/core/ArxString.cpp src/core/ArxString.h src/application/ResourceManager.cpp src/application/ResourceManager.h src/gui/Widget.cpp src/gui/Widget.h src/gui/BackgroundImageMetrics.h src/graphics/Color.h src/gui/WindowingSystem.cpp src/gui/WindowingSystem.h
         src/testbeds/Testbed.cpp src/testbeds/WindowingSystemTestbed.cpp src/testbeds/WindowingSystemTestbed.h src/testbeds/SimpleTestbed.cpp src/testbeds/SimpleTestbed.h src/graphics/Color.cpp external/stb/stb_truetype.h src/gui/Font.cpp src/gui/Font.h src/core/Metrics.h src/gui/TextWidget.cpp src/gui/TextWidget.h src/core/Moddable.h
         external/msdfgen/core/Bitmap.cpp
         external/msdfgen/core/Contour.cpp
@@ -51,9 +51,12 @@ set(SOURCE_FILES
         external/msdfgen/core/msdfgen.cpp
         external/msdfgen/core/render-sdf.cpp
         external/msdfgen/core/save-bmp.cpp
-        external/msdfgen/core/shape-description.cpp src/testbeds/MSDFTestbed.cpp src/testbeds/MSDFTestbed.h src/conf/AxmParser.cpp src/conf/AxmParser.h src/core/ArxFile.cpp src/core/ArxFile.h src/core/Parsing.h src/core/Introspection.cpp src/core/Introspection.h src/core/Format.h src/gui/LogViewerWidget.cpp src/gui/LogViewerWidget.h src/axistential/Physical.cpp src/axistential/Physical.h)
+        external/msdfgen/core/shape-description.cpp src/testbeds/MSDFTestbed.cpp src/testbeds/MSDFTestbed.h src/conf/AxmParser.cpp src/conf/AxmParser.h src/core/ArxFile.cpp src/core/ArxFile.h src/core/Parsing.h src/core/Introspection.cpp src/core/Introspection.h src/core/Format.h src/gui/LogViewerWidget.cpp src/gui/LogViewerWidget.h src/core/VoxelCoord.cpp src/math/ShapeHelpers.h src/math/Shapes3d.h src/math/AccumulatingStats.h src/math/MathHelpers.h src/graphics/Pov.h src/graphics/Pov.cpp)
 
-set(GENERATION_SOURCE_FILES test/core/Introspectable.h src/gui/Font.h axistential/Physical.h)
+SET(AXIS_SOURCE_FILES
+        src/axistential/data/Physical.cpp src/axistential/data/Physical.h src/axistential/data/WorldData.cpp src/axistential/data/WorldData.h src/axistential/components/LightComponent.cpp src/axistential/components/LightComponent.h src/axistential/graphics/Common.cpp src/axistential/graphics/Common.h)
+
+set(GENERATION_SOURCE_FILES test/core/Introspectable.h src/gui/Font.h src/axistential/data/Physical.h)
 
 set(FAKE_TARGET fakeTarget)
 add_custom_target(fakeTarget /bin/bash ${CMAKE_SOURCE_DIR}/axcPreprocess.sh ${GENERATION_SOURCE_FILES})
@@ -62,7 +65,7 @@ add_library(demo_lib STATIC ${SOURCE_FILES})
 add_dependencies(demo_lib catch)
 cotire(demo_lib)
 
-add_executable(demo main.cpp ${GLAD})
+add_executable(demo main.cpp ${GLAD} ${AXIS_SOURCE_FILES})
 target_link_libraries(demo demo_lib)
 target_link_libraries(demo glfw)
 TARGET_LINK_LIBRARIES(demo ${Boost_LIBRARIES} )
@@ -73,8 +76,8 @@ add_dependencies(demo_lib ${FAKE_TARGET})
 
 set(TEST_SOURCE_FILES
         test/testMain.cpp
-        test/UnitOfMeasureTests.cpp test/CombinatorTests.cpp test/EventTests.cpp test/OptionalTests.cpp test/PredefTests.cpp test/EnumTests.cpp test/ArxMapTests.cpp test/AuxDataTests.cpp test/engine/GameEngineTests.cpp test/containers/TaleaTests.cpp test/graphics/VBOTests.cpp test/graphics/ImageTests.cpp test/graphics/ShaderTests.cpp test/graphics/TextureBlockTests.cpp test/gui/FontTests.cpp test/core/ModdableTests.cpp test/conf/AxmParserTest.cpp test/core/IntrospectionTests.cpp test/core/Introspectable.h test/core/Introspectable.cpp test/gui/TextRenderingTest.cpp)
-add_executable(testing ${TEST_SOURCE_FILES} ${GLAD})
+        test/UnitOfMeasureTests.cpp test/CombinatorTests.cpp test/EventTests.cpp test/OptionalTests.cpp test/PredefTests.cpp test/EnumTests.cpp test/ArxMapTests.cpp test/AuxDataTests.cpp test/engine/GameEngineTests.cpp test/containers/TaleaTests.cpp test/graphics/VBOTests.cpp test/graphics/ImageTests.cpp test/graphics/ShaderTests.cpp test/graphics/TextureBlockTests.cpp test/gui/FontTests.cpp test/core/ModdableTests.cpp test/conf/AxmParserTest.cpp test/core/IntrospectionTests.cpp test/core/Introspectable.h test/core/Introspectable.cpp test/gui/TextRenderingTest.cpp test/axistential/LightComponentTests.cpp)
+add_executable(testing ${TEST_SOURCE_FILES} ${GLAD} ${AXIS_SOURCE_FILES})
 target_link_libraries(testing demo_lib)
 target_link_libraries(testing glfw)
 TARGET_LINK_LIBRARIES(testing ${Boost_LIBRARIES} )

@@ -6,13 +6,20 @@
 #include <chrono>
 #include <Noto.h>
 #include <fstream>
+#include <GLFW/glfw3.h>
 
-long long int epochMillisSteady() {
-    return chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now().time_since_epoch()).count();
+double elapsedSeconds() {
+    return glfwGetTime();
 }
 
-long long int epochNanosSteady() {
-    return chrono::duration_cast<chrono::nanoseconds>(chrono::high_resolution_clock::now().time_since_epoch()).count();
+long long int elapsedMillis() {
+//    return chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now().time_since_epoch()).count();
+    return (long long int) (glfwGetTime() * 1000);
+}
+
+long long int elapsedNanos() {
+//    return chrono::duration_cast<chrono::nanoseconds>(chrono::high_resolution_clock::now().time_since_epoch()).count();
+    return (long long int) (glfwGetTime() * 1e9);
 }
 
 

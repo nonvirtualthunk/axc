@@ -21,7 +21,7 @@ protected:
     std::shared_ptr<Shader> shader;
 
 public:
-    WindowingSystem(ControlEngine *controlEngien);
+    WindowingSystem(ControlEngine &controlEngien);
 
     void addWidget(Widget * widget);
 

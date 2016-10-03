@@ -6,8 +6,10 @@
 
 
 GameApplication::GameApplication() :
-graphicsEngine(&gameEngine),
-controlEngine(&gameEngine,&graphicsEngine)
+    world(new World()),
+    gameEngine(*world),
+    graphicsEngine(gameEngine),
+    controlEngine(gameEngine,graphicsEngine)
 {
 
 }

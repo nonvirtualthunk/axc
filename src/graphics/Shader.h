@@ -10,8 +10,6 @@
 #include <containers/ArxMap.h>
 #include <core/ArxString.h>
 #include <glm/mat4x4.hpp>
-#include <glm/ext.hpp>
-#include <glad/glad.h>
 #include <Noto.h>
 
 
@@ -42,21 +40,15 @@ public:
     bool commit();
 
 
-    GLint uniformLocation(const std::string& uniformName) {
-        return uniformLocations.getOrElseUpdate(uniformName,[&](){
-            return glGetUniformLocation(name, uniformName.c_str());
-        });
-    }
+    GLint uniformLocation(const std::string& uniformName);
 
-    void setUniform(const std::string& uniformName, const int& newValue) {
-        glUniform1i(uniformLocation(uniformName),newValue);
-    }
+    bool hasUniform(const std::string& uniformName);
 
-    void setUniform(const std::string& uniformName, const glm::mat4x4& newValue) {
-        glUniformMatrix4fv(uniformLocation(uniformName),1,GL_FALSE,glm::value_ptr(newValue));
-    }
+    void setUniform(const std::string& uniformName, const int& newValue);
 
-    static void bind(GLuint shaderName);
+    void setUniform(const std::string& uniformName, const glm::mat4x4& newValue);
+
+    static void bind(GLuint shaderName, Shader * shaderObject);
     static bool isGood(GLuint name, GLenum kind);
 };
 

@@ -7,7 +7,7 @@
 
 
 #include <glm/vec2.hpp>
-#include <math/Shapes.h>
+#include <math/Shapes2d.h>
 #include <vector>
 #include <containers/Seq.h>
 #include <graphics/Image.h>

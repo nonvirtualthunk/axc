@@ -33,7 +33,7 @@ EventType EventType::getOrCreateEventType(std::string name, int associatedTypeId
 }
 
 EventBus::EventBus() :
-        timeFunction([]() { return epochMillisSteady(); })
+        timeFunction([]() { return elapsedMillis(); })
 {
 
 }

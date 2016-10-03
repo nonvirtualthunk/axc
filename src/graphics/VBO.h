@@ -192,8 +192,12 @@ public:
         indices.clear();
     }
 
-    bool changeState (VBOs::VBOState from, VBOs::VBOState to) {
-        return state.compare_exchange_strong(from,to);
+    bool changeState (VBOs::VBOState from, VBOs::VBOState to, bool required = false) {
+        bool ret = state.compare_exchange_strong(from,to);
+        if (required && ! ret) {
+            Noto::error("Failed to change state from {} to {} for VBO", (int)from, (int)to);
+        }
+        return ret;
     }
 
 protected:

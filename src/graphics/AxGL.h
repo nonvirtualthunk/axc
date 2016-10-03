@@ -6,6 +6,9 @@
 #define TEST2_AXGL_H
 
 #include <OpenGL/OpenGL.h>
+#include <Optional.h>
+
+class Shader;
 
 class AxGL {
 public:
@@ -20,6 +23,7 @@ public:
     static GLuint boundVertexArrayObject;
     static bool vertexAttribEnabled[20];
     static GLuint activeShader;
+    static Optional<Shader*> activeShaderObject;
     static Viewport activeViewport;
 
     static void checkError();

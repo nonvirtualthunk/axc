@@ -44,6 +44,6 @@ TEST_CASE("Filter combinator","[combinators]") {
 
 TEST_CASE("Chained seq combinators","[combinators][seq]") {
     auto seq1 = Seq({1,2,3,4});
-    auto res = seq1.filter(fni(i % 2 == 0)).map(fni(i * 2));
+    auto res = seq1.filter(fni(i % 2 == 0)).map<int>(fni(i * 2));
     REQUIRE(res == Seq({4,8}));
 }

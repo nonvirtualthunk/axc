@@ -91,12 +91,24 @@ namespace Arx {
 
         template<typename Op>
         Self filter(Op op) const {
-            return Self(comb::filter(*this, op));
+            Self ret;
+			for (const T& t : intern) {
+				if (op(t)) {
+					ret.add(t);
+				}
+			}
+			return ret;
         }
 
         template<typename Op>
         Self filterNot(Op op) const {
-            return Self(comb::filterNot(*this, op));
+			Self ret;
+			for (const T& t : intern) {
+				if (!op(t)) {
+					ret.add(t);
+				}
+			}
+			return ret;
         }
 
         template<typename Op>

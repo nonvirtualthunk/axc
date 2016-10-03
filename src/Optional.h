@@ -82,7 +82,7 @@ public:
         }
     }
 private:
-    const bool _isEmpty;
+    bool _isEmpty;
     uint8_t intern[sizeof(T)];
 
     Optional(const bool isEmpty, const T value) : _isEmpty(isEmpty) {
@@ -91,6 +91,11 @@ private:
 
 public:
     Optional() : _isEmpty(true) {}
+
+
+    Optional(const Optional<T>& other) : _isEmpty(other.isEmpty()) {
+        memcpy(intern,other.intern,sizeof(T));
+    }
 
     bool operator==(const Optional &rhs) const {
         if (_isEmpty && rhs._isEmpty) {

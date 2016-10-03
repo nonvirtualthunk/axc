@@ -22,11 +22,16 @@
 *.la
 *.a
 *.lib
+*.idea
 
 # Executables
 *.exe
 *.out
 *.app
+
+# Generated code
+*_generated.h
+*_generated.cpp
 
 # CMake
 CMakeCache.txt

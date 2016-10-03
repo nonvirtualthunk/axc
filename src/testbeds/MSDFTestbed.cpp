@@ -9,6 +9,7 @@
 #include <graphics/Shader.h>
 #include <GUIEvents.h>
 #include <GLFW/glfw3.h>
+#include <glm/gtc/matrix_transform.hpp>
 #include "MSDFTestbed.h"
 
 float zoom = 24.0f;
@@ -24,7 +25,7 @@ public:
     TextureBlock* tb = new TextureBlock(1024,1024);
     ShaderPtr shader;
 
-    MSDFGraphicsComponent(GraphicsEngine *graphicsEngine) : GraphicsComponent(graphicsEngine) {}
+    MSDFGraphicsComponent(GraphicsEngine &graphicsEngine) : GraphicsComponent(graphicsEngine) {}
 
     virtual void init() override {
         tb->minFilter = GL_NEAREST;
@@ -121,7 +122,7 @@ public:
 
 class MSDFControlComponent : public ControlComponent {
 public:
-    MSDFControlComponent(ControlEngine *controlEngien) : ControlComponent(controlEngien) {}
+    MSDFControlComponent(ControlEngine &controlEngien) : ControlComponent(controlEngien) {}
 
     virtual void init() override {
         controlBus.onEvent<KeyEvent>([&](KeyEventPtr ke) {

@@ -11,6 +11,7 @@
 
 class GameApplication : public Application {
 public:
+	World * world;
     GameEngine gameEngine;
     GraphicsEngine graphicsEngine;
     ControlEngine controlEngine;
